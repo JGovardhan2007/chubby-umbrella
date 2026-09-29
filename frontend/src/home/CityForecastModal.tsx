@@ -1,9 +1,8 @@
 import React from 'react';
-import { X, CloudRain, Wind, Droplets, Thermometer, ShieldAlert, ArrowRight, Sun, CloudLightning } from 'lucide-react';
+import { X, CloudRain, Wind, Droplets, Thermometer, ShieldAlert, ArrowRight, CloudLightning } from 'lucide-react';
 
 export interface CityWeatherRecord {
   city: string;
-  cityHi: string;
   condition: string;
   temp: string;
   windDirection: string;
@@ -48,7 +47,7 @@ export const CityForecastModal: React.FC<CityForecastModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold tracking-tight text-white flex items-center gap-2">
-                <span>{city.city} ({city.cityHi})</span>
+                <span>{city.city}</span>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-900/60 text-cyan-300 border border-cyan-700/50">
                   IMD Official Guidance
                 </span>

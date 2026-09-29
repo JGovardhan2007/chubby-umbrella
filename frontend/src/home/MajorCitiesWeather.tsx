@@ -1,11 +1,10 @@
 import React, { useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, Wind, Droplets, Thermometer, CloudFog, Cloud, Sun, Moon, CloudSun, Waves } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Wind, Droplets, Thermometer, CloudFog, Cloud, Moon, CloudSun, Waves } from 'lucide-react';
 import { CityWeatherRecord, CityForecastModal } from './CityForecastModal';
 
 export const MAJOR_CITIES_WEATHER_DATA: CityWeatherRecord[] = [
   {
     city: 'Kolkata',
-    cityHi: 'कोलकाता',
     condition: 'Haze',
     temp: '31.0 ° C',
     windDirection: 'Calm',
@@ -16,7 +15,6 @@ export const MAJOR_CITIES_WEATHER_DATA: CityWeatherRecord[] = [
   },
   {
     city: 'Ahmedabad',
-    cityHi: 'अहमदाबाद',
     condition: 'Smoke Fog',
     temp: '29.0 ° C',
     windDirection: 'No Direction',
@@ -27,7 +25,6 @@ export const MAJOR_CITIES_WEATHER_DATA: CityWeatherRecord[] = [
   },
   {
     city: 'Pune',
-    cityHi: 'पुणे',
     condition: 'Generally Cloudy Sky',
     temp: '28.6 ° C',
     windDirection: 'Calm',
@@ -38,7 +35,6 @@ export const MAJOR_CITIES_WEATHER_DATA: CityWeatherRecord[] = [
   },
   {
     city: 'Delhi',
-    cityHi: 'दिल्ली',
     condition: 'Clear Sky',
     temp: '30.8 ° C',
     windDirection: 'Southwesterly',
@@ -49,7 +45,6 @@ export const MAJOR_CITIES_WEATHER_DATA: CityWeatherRecord[] = [
   },
   {
     city: 'Mumbai',
-    cityHi: 'मुंबई',
     condition: 'Smoke Fog',
     temp: '26.0 ° C',
     windDirection: 'Northwesterly',
@@ -60,7 +55,6 @@ export const MAJOR_CITIES_WEATHER_DATA: CityWeatherRecord[] = [
   },
   {
     city: 'Chennai',
-    cityHi: 'चेन्नई',
     condition: 'Humid / Partly Cloudy',
     temp: '31.4 ° C',
     windDirection: 'Easterly',
@@ -71,7 +65,6 @@ export const MAJOR_CITIES_WEATHER_DATA: CityWeatherRecord[] = [
   },
   {
     city: 'Bengaluru',
-    cityHi: 'बेंगलुरु',
     condition: 'Passing Showers',
     temp: '27.2 ° C',
     windDirection: 'Westerly',
@@ -82,7 +75,6 @@ export const MAJOR_CITIES_WEATHER_DATA: CityWeatherRecord[] = [
   },
   {
     city: 'Hyderabad',
-    cityHi: 'हैदराबाद',
     condition: 'Scattered Clouds',
     temp: '29.5 ° C',
     windDirection: 'Northwesterly',
@@ -131,7 +123,6 @@ export const MajorCitiesWeather: React.FC<MajorCitiesWeatherProps> = ({ onOpenMa
     if (c.includes('haze')) {
       return (
         <div className="flex items-center justify-center">
-          {/* Stylized infinity / haze symbol matching IMD */}
           <Waves className="w-7 h-7 text-cyan-200 stroke-[1.7]" />
         </div>
       );
@@ -186,9 +177,6 @@ export const MajorCitiesWeather: React.FC<MajorCitiesWeatherProps> = ({ onOpenMa
               <h3 className="text-base font-bold text-white tracking-wide">
                 {record.city}
               </h3>
-              <span className="text-[10px] text-cyan-200/80 font-serif">
-                {record.cityHi}
-              </span>
             </div>
 
             {/* Row 1: Weather Condition Icon & Thermometer / Temp */}
@@ -239,7 +227,7 @@ export const MajorCitiesWeather: React.FC<MajorCitiesWeatherProps> = ({ onOpenMa
               </div>
             </div>
 
-            {/* FORECAST Button in Gold/Yellow (Exact Match to Screenshot) */}
+            {/* FORECAST Button in Gold/Yellow */}
             <div className="pt-3 text-center border-t border-blue-400/20">
               <button
                 onClick={() => setSelectedForecastCity(record)}

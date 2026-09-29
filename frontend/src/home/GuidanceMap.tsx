@@ -3,7 +3,6 @@ import { Layers, Wind, Eye, ZoomIn, Navigation, ArrowUpRight, Flame, ShieldAlert
 
 interface CityPoint {
   name: string;
-  nameHi: string;
   lat: number;
   lon: number;
   x: number; // percentage coordinates on India map SVG box [0..100]
@@ -15,17 +14,17 @@ interface CityPoint {
 }
 
 const INDIA_CITIES: CityPoint[] = [
-  { name: 'Delhi', nameHi: 'दिल्ली', lat: 28.6139, lon: 77.2090, x: 40, y: 28, temp: 30.8, condition: 'Clear Sky', convectiveRisk: 'Low', radarDbz: 18 },
-  { name: 'Kolkata', nameHi: 'कोलकाता', lat: 22.5726, lon: 88.3639, x: 74, y: 46, temp: 31.0, condition: 'Severe Thunderstorm', convectiveRisk: 'Severe', radarDbz: 52 },
-  { name: 'Mumbai', nameHi: 'मुंबई', lat: 19.0760, lon: 72.8777, x: 26, y: 56, temp: 26.0, condition: 'Smoke Fog', convectiveRisk: 'Low', radarDbz: 12 },
-  { name: 'Ahmedabad', nameHi: 'अहमदाबाद', lat: 23.0225, lon: 72.5714, x: 25, y: 44, temp: 29.0, condition: 'Smoke Fog', convectiveRisk: 'Moderate', radarDbz: 28 },
-  { name: 'Pune', nameHi: 'पुणे', lat: 18.5204, lon: 73.8567, x: 30, y: 59, temp: 28.6, condition: 'Cloudy Sky', convectiveRisk: 'Moderate', radarDbz: 32 },
-  { name: 'Chennai', nameHi: 'चेन्नई', lat: 13.0827, lon: 80.2707, x: 50, y: 77, temp: 31.4, condition: 'Developing CI', convectiveRisk: 'High', radarDbz: 44 },
-  { name: 'Bengaluru', nameHi: 'बेंगलुरु', lat: 12.9716, lon: 77.5946, x: 42, y: 78, temp: 27.2, condition: 'Scattered Showers', convectiveRisk: 'Moderate', radarDbz: 34 },
-  { name: 'Hyderabad', nameHi: 'हैदराबाद', lat: 17.3850, lon: 78.4867, x: 45, y: 62, temp: 29.5, condition: 'Isolated Cells', convectiveRisk: 'High', radarDbz: 41 },
-  { name: 'Guwahati', nameHi: 'गुवाहाटी', lat: 26.1445, lon: 91.7362, x: 88, y: 35, temp: 26.4, condition: 'Cloudburst Warning', convectiveRisk: 'Severe', radarDbz: 56 },
-  { name: 'Jaipur', nameHi: 'जयपुर', lat: 26.9124, lon: 75.7873, x: 35, y: 34, temp: 32.1, condition: 'Sunny / Dry', convectiveRisk: 'Low', radarDbz: 10 },
-  { name: 'Bhubaneswar', nameHi: 'भुवनेश्वर', lat: 20.2961, lon: 85.8245, x: 67, y: 53, temp: 30.2, condition: 'Thunderstorm Active', convectiveRisk: 'High', radarDbz: 48 },
+  { name: 'Delhi', lat: 28.6139, lon: 77.2090, x: 40, y: 28, temp: 30.8, condition: 'Clear Sky', convectiveRisk: 'Low', radarDbz: 18 },
+  { name: 'Kolkata', lat: 22.5726, lon: 88.3639, x: 74, y: 46, temp: 31.0, condition: 'Severe Thunderstorm', convectiveRisk: 'Severe', radarDbz: 52 },
+  { name: 'Mumbai', lat: 19.0760, lon: 72.8777, x: 26, y: 56, temp: 26.0, condition: 'Smoke Fog', convectiveRisk: 'Low', radarDbz: 12 },
+  { name: 'Ahmedabad', lat: 23.0225, lon: 72.5714, x: 25, y: 44, temp: 29.0, condition: 'Smoke Fog', convectiveRisk: 'Moderate', radarDbz: 28 },
+  { name: 'Pune', lat: 18.5204, lon: 73.8567, x: 30, y: 59, temp: 28.6, condition: 'Cloudy Sky', convectiveRisk: 'Moderate', radarDbz: 32 },
+  { name: 'Chennai', lat: 13.0827, lon: 80.2707, x: 50, y: 77, temp: 31.4, condition: 'Developing Convection', convectiveRisk: 'High', radarDbz: 44 },
+  { name: 'Bengaluru', lat: 12.9716, lon: 77.5946, x: 42, y: 78, temp: 27.2, condition: 'Scattered Showers', convectiveRisk: 'Moderate', radarDbz: 34 },
+  { name: 'Hyderabad', lat: 17.3850, lon: 78.4867, x: 45, y: 62, temp: 29.5, condition: 'Isolated Cells', convectiveRisk: 'High', radarDbz: 41 },
+  { name: 'Guwahati', lat: 26.1445, lon: 91.7362, x: 88, y: 35, temp: 26.4, condition: 'Cloudburst Warning', convectiveRisk: 'Severe', radarDbz: 56 },
+  { name: 'Jaipur', lat: 26.9124, lon: 75.7873, x: 35, y: 34, temp: 32.1, condition: 'Sunny / Dry', convectiveRisk: 'Low', radarDbz: 10 },
+  { name: 'Bhubaneswar', lat: 20.2961, lon: 85.8245, x: 67, y: 53, temp: 30.2, condition: 'Thunderstorm Active', convectiveRisk: 'High', radarDbz: 48 },
 ];
 
 interface GuidanceMapProps {
@@ -34,7 +33,7 @@ interface GuidanceMapProps {
 
 export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [activeLayer, setActiveLayer] = useState<'wind' | 'radar' | 'satellite'>('wind');
+  const [activeLayer, setActiveLayer] = useState<'wind' | 'radar'>('wind');
   const [selectedCity, setSelectedCity] = useState<CityPoint | null>(null);
 
   // Animated wind streamlines simulation on canvas
@@ -57,7 +56,6 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
       length: number;
       life: number;
       maxLife: number;
-      angle: number;
     }
 
     const particles: Particle[] = [];
@@ -69,7 +67,6 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
         length: 8 + Math.random() * 14,
         life: Math.random() * 100,
         maxLife: 80 + Math.random() * 60,
-        angle: 0,
       });
     }
 
@@ -80,7 +77,6 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
 
       // Draw wind stream particles with Monsoon / Bay of Bengal cyclonic curved flow
       for (const p of particles) {
-        // Cyclonic curvature over Bay of Bengal & Arabian Sea monsoon drift
         const normalizedX = p.x / width;
         const normalizedY = p.y / height;
 
@@ -132,19 +128,19 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
 
   return (
     <div className="bg-[#122B3E] rounded-2xl overflow-hidden border border-slate-700/60 shadow-xl flex flex-col h-[560px] relative text-white">
-      {/* 1. Header Bar: NCMRWF "मौसम मार्गदर्शन पोर्टल" */}
+      {/* 1. Header Bar: NCMRWF Weather Guidance Portal */}
       <div className="bg-gradient-to-r from-[#DF691A] to-[#B85210] px-4 py-2.5 flex items-center justify-between z-20 shadow-md">
         <div className="flex items-center gap-2">
           <Wind className="w-5 h-5 text-white" />
           <div>
             <h3 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
-              <span>मौसम मार्गदर्शन पोर्टल</span>
+              <span>Weather Guidance Portal</span>
               <span className="text-xs font-normal text-amber-100 hidden sm:inline">
-                | Convective Weather Guidance
+                | Convective Weather Forecast
               </span>
             </h3>
             <p className="text-[10px] text-amber-100 font-medium">
-              National Center Medium Range Weather Forecasting (NCMRWF)
+              National Centre for Medium Range Weather Forecasting (NCMRWF)
             </p>
           </div>
         </div>
@@ -160,7 +156,7 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
             }`}
           >
             <Wind className="w-3 h-3" />
-            <span>पवन प्रवाह (Winds)</span>
+            <span>Wind Flow</span>
           </button>
           <button
             onClick={() => setActiveLayer('radar')}
@@ -171,7 +167,7 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
             }`}
           >
             <Flame className="w-3 h-3" />
-            <span>रडार (Reflectivity)</span>
+            <span>Reflectivity (Radar)</span>
           </button>
         </div>
       </div>
@@ -256,7 +252,6 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
               <div>
                 <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
                   <span>{selectedCity.name}</span>
-                  <span className="text-xs text-amber-300 font-serif">({selectedCity.nameHi})</span>
                 </h4>
                 <div className="text-[10px] text-slate-400">
                   {selectedCity.lat.toFixed(2)}°N, {selectedCity.lon.toFixed(2)}°E • Synoptic Station
@@ -308,14 +303,14 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
       <div className="bg-[#0A1A27] px-4 py-2.5 border-t border-slate-700/60 flex items-center justify-between text-xs z-20">
         <div className="flex items-center gap-2 text-[11px] text-slate-300">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-          <span>लाइव संवहनीय हवाएं और रडार परावर्तन स्ट्रीम (Active Multi-Sensor Feed)</span>
+          <span>Live Convective Winds & Radar Reflectivity Stream</span>
         </div>
 
         <button
           onClick={() => onNavigateToMap()}
           className="flex items-center gap-1 px-3 py-1 bg-[#DF691A] hover:bg-orange-600 text-white font-bold rounded-lg transition-all text-xs shadow-xs"
         >
-          <span>पूर्ण मौसम मानचित्र खोलें (Open Map)</span>
+          <span>Open Nowcast Map</span>
           <ArrowUpRight className="w-3.5 h-3.5" />
         </button>
       </div>

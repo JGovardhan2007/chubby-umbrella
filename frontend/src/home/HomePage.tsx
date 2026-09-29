@@ -1,5 +1,4 @@
 import React from 'react';
-import { GovHeader } from './GovHeader';
 import { AlertTicker } from './AlertTicker';
 import { GuidanceMap } from './GuidanceMap';
 import { MajorCitiesWeather } from './MajorCitiesWeather';
@@ -29,7 +28,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToMap }) => {
             </div>
             <div>
               <h2 className="text-sm md:text-base font-bold text-amber-950 font-serif">
-                राष्ट्रीय संवहनीय मौसम पूर्वचेतावनी एवं विश्लेषण प्रणाली
+                National Convective Early Warning & Diagnostic System
               </h2>
               <p className="text-xs text-slate-600">
                 0–6 Hour Probabilistic Nowcasting for Severe Thunderstorms, Hail, Downbursts & Cloudbursts
@@ -42,7 +41,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToMap }) => {
               onClick={() => onNavigateToMap()}
               className="px-4 py-2 bg-[#DF691A] hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition-all"
             >
-              <span>मौसम मानचित्र खोलें (Launch Radar GIS)</span>
+              <span>Launch Nowcast Radar Map</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -50,12 +49,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToMap }) => {
 
         {/* 2-Columns Grid: Left = NCMRWF Guidance Map, Right = IMD Major Cities */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-          {/* LEFT: "मौसम मार्गदर्शन पोर्टल" Guidance Map with Animated Wind Streamlines */}
+          {/* LEFT: Guidance Map with Animated Wind Streamlines */}
           <section className="flex flex-col">
             <GuidanceMap onNavigateToMap={onNavigateToMap} />
           </section>
 
-          {/* RIGHT: "CURRENT WEATHER ACROSS MAJOR CITIES" IMD Blue Weather Cards */}
+          {/* RIGHT: CURRENT WEATHER ACROSS MAJOR CITIES (IMD Blue Weather Cards) */}
           <section className="flex flex-col">
             <MajorCitiesWeather onOpenMapForCity={onNavigateToMap} />
           </section>
@@ -110,15 +109,15 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToMap }) => {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
           <div className="flex flex-col">
             <span className="font-bold text-white">
-              राष्ट्रीय मध्यम अवधि मौसम पूर्वानुमान केंद्र (NCMRWF) • भारत मौसम विज्ञान विभाग (IMD)
+              National Centre for Medium Range Weather Forecasting (NCMRWF) • India Meteorological Department (IMD)
             </span>
             <span className="text-[11px] text-amber-200/70">
-              पृथ्वी विज्ञान मंत्रालय, भारत सरकार (Ministry of Earth Sciences, Govt. of India)
+              Ministry of Earth Sciences, Government of India
             </span>
           </div>
 
           <div className="text-[11px] text-amber-200/70">
-            Smart India Hackathon 2024 / 2026 (Problem Statement 26084) • Convective Nowcasting System
+            Smart India Hackathon (Problem Statement 26084) • Convective Scale Nowcasting System
           </div>
         </div>
       </footer>

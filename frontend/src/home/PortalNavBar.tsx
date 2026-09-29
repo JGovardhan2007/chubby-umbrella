@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Map, Radio, ShieldCheck, ChevronRight, Activity } from 'lucide-react';
+import { Home, Map, Radio, ChevronRight } from 'lucide-react';
 
 interface PortalNavBarProps {
   activeTab: 'home' | 'map';
@@ -26,7 +26,7 @@ export const PortalNavBar: React.FC<PortalNavBarProps> = ({
             }`}
           >
             <Home className="w-4 h-4" />
-            <span>मुखपृष्ठ (Home)</span>
+            <span>Home</span>
           </button>
 
           <button
@@ -38,7 +38,7 @@ export const PortalNavBar: React.FC<PortalNavBarProps> = ({
             }`}
           >
             <Map className="w-4 h-4" />
-            <span>मौसम मानचित्र (Nowcast Map)</span>
+            <span>Nowcast Map</span>
             <span className="flex h-2 w-2 relative ml-1">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>

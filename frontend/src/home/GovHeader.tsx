@@ -1,15 +1,7 @@
 import React from 'react';
-import { Shield, ExternalLink, Globe } from 'lucide-react';
+import { Shield, Radio, Activity } from 'lucide-react';
 
-interface GovHeaderProps {
-  onLanguageChange?: (lang: 'hi' | 'en') => void;
-  currentLang?: 'hi' | 'en';
-}
-
-export const GovHeader: React.FC<GovHeaderProps> = ({
-  onLanguageChange,
-  currentLang = 'hi'
-}) => {
+export const GovHeader: React.FC = () => {
   return (
     <div className="bg-[#FAF5EE] border-b border-amber-900/10 px-4 md:px-8 py-2.5 flex items-center justify-between select-none">
       {/* 1. Left: National Emblem & Ministry / Centre Title */}
@@ -32,36 +24,33 @@ export const GovHeader: React.FC<GovHeaderProps> = ({
             {/* Base Pedestal */}
             <path d="M20 62 L80 62 L74 74 L26 74 Z" />
             <rect x="22" y="76" width="56" height="5" rx="1" />
-            <text x="50" y="93" textAnchor="middle" fontSize="10" fontWeight="bold" fontFamily="serif">सत्यमेव जयते</text>
+            <text x="50" y="93" textAnchor="middle" fontSize="9" fontWeight="bold" fontFamily="serif">GOVERNMENT OF INDIA</text>
           </svg>
         </div>
 
-        {/* Titles in Hindi and English */}
+        {/* Titles in Pure English */}
         <div className="flex flex-col">
           <h1 className="text-sm md:text-base font-bold text-amber-950 font-serif leading-tight tracking-tight">
-            राष्ट्रीय मध्यम अवधि मौसम पूर्वानुमान केंद्र
-          </h1>
-          <h2 className="text-xs md:text-sm font-semibold text-slate-800 tracking-tight">
             National Centre for Medium Range Weather Forecasting
-          </h2>
-          <div className="flex items-center gap-1.5 text-[11px] text-amber-900/80 font-medium">
-            <span>पृथ्वी विज्ञान मंत्रालय, भारत सरकार</span>
+          </h1>
+          <div className="flex items-center gap-1.5 text-xs text-amber-900/80 font-medium">
+            <span>Ministry of Earth Sciences</span>
             <span>•</span>
-            <span className="text-slate-600">Ministry of Earth Sciences, Government of India</span>
+            <span className="text-slate-600">Government of India</span>
           </div>
         </div>
       </div>
 
-      {/* 2. Right: Official Centre Logo + IMD & AI for Science Badges */}
-      <div className="hidden lg:flex items-center gap-5">
+      {/* 2. Right: Official Centre Logo + IMD Badges */}
+      <div className="hidden lg:flex items-center gap-4">
         {/* NCMRWF Logo Emblem */}
         <div className="flex items-center gap-2 px-3 py-1.5 bg-white/80 rounded-xl border border-amber-900/10 shadow-2xs">
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-600 to-orange-400 flex items-center justify-center text-white font-bold text-xs shadow-inner">
             ⚡
           </div>
-          <div className="text-right">
+          <div className="text-left">
             <div className="text-[11px] font-bold text-amber-950 tracking-wider">NCMRWF</div>
-            <div className="text-[9px] text-slate-500 font-medium">रा.म.अ.मौ.पू.कें.</div>
+            <div className="text-[9px] text-slate-500 font-medium">Weather Informatics</div>
           </div>
         </div>
 
@@ -76,15 +65,10 @@ export const GovHeader: React.FC<GovHeaderProps> = ({
           </div>
         </div>
 
-        {/* Language selector & portal switch */}
-        <div className="flex items-center gap-2 pl-2 border-l border-amber-900/20">
-          <button
-            onClick={() => onLanguageChange && onLanguageChange(currentLang === 'hi' ? 'en' : 'hi')}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-amber-50 hover:text-amber-900 hover:border-amber-300 transition-colors"
-          >
-            <Globe className="w-3 h-3 text-amber-700" />
-            <span>{currentLang === 'hi' ? 'English' : 'हिंदी'}</span>
-          </button>
+        {/* Live Operational Status */}
+        <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-xs font-semibold">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>Operational Portal</span>
         </div>
       </div>
     </div>
