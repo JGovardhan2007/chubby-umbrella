@@ -202,66 +202,63 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
     };
     window.addEventListener('resize', handleResize);
 
-    // High-Density Global Wind Streamline Particle Engine
-    const NUM_PARTICLES = 1100;
+    // High-Quality Atmospheric Streamline Particle Engine (Gentle Organic Flow)
+    const NUM_PARTICLES = 420;
     interface StreamParticle {
       lon: number;
       lat: number;
       speed: number;
       age: number;
       maxAge: number;
-      trail: [number, number][]; // Pixel coordinates history for smooth curved ribbons
+      trail: [number, number][]; // Multi-point pixel trail for curved arcs
     }
 
-    // Mathematical global atmospheric vector field: computes u (zonal) and v (meridional) wind vectors
+    // Mathematical global atmospheric vector field
     const getWindVector = (lon: number, lat: number) => {
-      let u = 0.6;
-      let v = 0.2;
+      let u = 0.5;
+      let v = 0.15;
 
-      // 1. South-Westerly Monsoon & Somali Cross-Equatorial Low Level Jet (Arabian Sea)
-      if (lat >= -5 && lat <= 22 && lon >= 38 && lon <= 78) {
-        const jetFactor = Math.sin(((lat + 5) / 27) * Math.PI);
-        u = 1.6 * jetFactor + 0.4;
-        v = 0.9 * jetFactor + 0.2;
+      // 1. South-Westerly Monsoon & Somali Jet (Arabian Sea)
+      if (lat >= -5 && lat <= 20 && lon >= 40 && lon <= 77) {
+        const jetFactor = Math.sin(((lat + 5) / 25) * Math.PI);
+        u = 0.9 * jetFactor + 0.3;
+        v = 0.5 * jetFactor + 0.15;
       }
-      // 2. Bay of Bengal Cyclonic Depression & Monsoon Trough
-      else if (lat >= 10 && lat <= 26 && lon >= 80 && lon <= 98) {
-        const cLon = 89.0;
-        const cLat = 19.5;
-        const dx = (lon - cLon) * 0.15;
-        const dy = (lat - cLat) * 0.15;
-        const dist = Math.sqrt(dx * dx + dy * dy) + 0.1;
-        u = -dy * (1.2 / dist) + 0.5;
-        v = dx * (1.2 / dist) + 0.35;
+      // 2. Bay of Bengal Cyclonic Depression & Curved Circulation
+      else if (lat >= 8 && lat <= 24 && lon >= 79 && lon <= 96) {
+        const cLon = 88.5;
+        const cLat = 17.5;
+        const dx = (lon - cLon) * 0.18;
+        const dy = (lat - cLat) * 0.18;
+        const dist = Math.sqrt(dx * dx + dy * dy) + 0.2;
+        u = -dy * (0.8 / dist) + 0.35;
+        v = dx * (0.8 / dist) + 0.25;
       }
-      // 3. Subtropical Westerly Jet Stream across Himalayas, Tibet & Central Asia
-      else if (lat >= 27 && lat <= 48) {
-        const wave = Math.sin((lon / 180) * Math.PI * 4);
-        u = 1.9 + wave * 0.4;
-        v = -0.3 + wave * 0.3;
+      // 3. Subtropical Westerlies across Northern Plains, Himalayas & Tibet
+      else if (lat >= 25 && lat <= 45) {
+        const wave = Math.sin((lon / 180) * Math.PI * 3);
+        u = 1.1 + wave * 0.25;
+        v = -0.15 + wave * 0.15;
       }
-      // 4. Arabian Peninsula & Persian Gulf Anticyclonic Circulation
-      else if (lat >= 15 && lat <= 35 && lon >= 35 && lon <= 60) {
-        const cLon = 48.0;
-        const cLat = 24.0;
-        const dx = (lon - cLon) * 0.1;
-        const dy = (lat - cLat) * 0.1;
-        u = dy * 0.6 + 0.3;
-        v = -dx * 0.6 - 0.2;
+      // 4. Arabian Peninsula Anticyclonic Ridge
+      else if (lat >= 14 && lat <= 32 && lon >= 36 && lon <= 60) {
+        const dx = (lon - 48.0) * 0.12;
+        const dy = (lat - 23.0) * 0.12;
+        u = dy * 0.4 + 0.25;
+        v = -dx * 0.4 - 0.15;
       }
-      // 5. Southern Indian Ocean South-East Trade Winds
+      // 5. Southern Indian Ocean Southeasterly Trade Winds
       else if (lat < 0) {
-        u = -1.2;
-        v = 0.5;
+        u = -0.85;
+        v = 0.35;
       }
-      // 6. Southeast Asia / Indochina northward monsoon surge
-      else if (lon > 98 && lat > 5 && lat < 28) {
-        u = 0.5;
-        v = 1.1;
-      }
-      else {
-        u = 0.7 + Math.sin((lon + lat) * 0.1) * 0.3;
-        v = 0.2 + Math.cos((lon - lat) * 0.1) * 0.2;
+      // 6. Southeast Asia / Myanmar Monsoon Inflow
+      else if (lon > 96 && lat > 8 && lat < 26) {
+        u = 0.3;
+        v = 0.75;
+      } else {
+        u = 0.5 + Math.sin((lon + lat) * 0.08) * 0.2;
+        v = 0.1 + Math.cos((lon - lat) * 0.08) * 0.15;
       }
 
       return { u, v };
@@ -269,27 +266,27 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
 
     const spawnParticle = (): StreamParticle => {
       const map = mapRef.current;
-      let minLon = 30;
-      let maxLon = 120;
-      let minLat = -10;
-      let maxLat = 55;
+      let minLon = 35;
+      let maxLon = 115;
+      let minLat = -5;
+      let maxLat = 50;
 
       if (map) {
         try {
           const bounds = map.getBounds();
-          minLon = bounds.getWest() - 5;
-          maxLon = bounds.getEast() + 5;
-          minLat = bounds.getSouth() - 4;
-          maxLat = bounds.getNorth() + 4;
+          minLon = bounds.getWest() - 3;
+          maxLon = bounds.getEast() + 3;
+          minLat = bounds.getSouth() - 2;
+          maxLat = bounds.getNorth() + 2;
         } catch {}
       }
 
       return {
         lon: minLon + Math.random() * (maxLon - minLon),
         lat: minLat + Math.random() * (maxLat - minLat),
-        speed: 0.10 + Math.random() * 0.16,
+        speed: 0.009 + Math.random() * 0.013, // Gentle slow atmospheric drift
         age: 0,
-        maxAge: 70 + Math.random() * 80,
+        maxAge: 45 + Math.random() * 55,
         trail: []
       };
     };
@@ -297,7 +294,7 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
     const particles: StreamParticle[] = [];
     for (let i = 0; i < NUM_PARTICLES; i++) {
       const p = spawnParticle();
-      p.age = Math.random() * p.maxAge; // Stagger initial ages
+      p.age = Math.random() * p.maxAge;
       particles.push(p);
     }
 
@@ -311,12 +308,11 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
           const p = particles[i];
           const { u, v } = getWindVector(p.lon, p.lat);
 
-          // Advance geographic coordinates
+          // Slow, gentle physical coordinate advancement
           p.lon += u * p.speed;
           p.lat += v * p.speed;
           p.age += 1;
 
-          // Convert geographic coordinates to canvas pixel position
           let px = 0;
           let py = 0;
 
@@ -326,36 +322,35 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
               px = pos.x;
               py = pos.y;
             } catch {
-              px = (p.lon - 30) * (width / 90);
-              py = (55 - p.lat) * (height / 65);
+              px = (p.lon - 35) * (width / 80);
+              py = (50 - p.lat) * (height / 55);
             }
           } else {
-            px = (p.lon - 30) * (width / 90);
-            py = (55 - p.lat) * (height / 65);
+            px = (p.lon - 35) * (width / 80);
+            py = (50 - p.lat) * (height / 55);
           }
 
-          // Maintain smooth trail history (max 8-10 points for curved aerodynamic ribbon)
+          // Maintain short curved trail (5-6 points max)
           p.trail.push([px, py]);
-          if (p.trail.length > 10) {
+          if (p.trail.length > 6) {
             p.trail.shift();
           }
 
-          // Check if particle exceeded lifespan or went far offscreen
           if (
             p.age >= p.maxAge ||
-            px < -80 ||
-            px > width + 80 ||
-            py < -80 ||
-            py > height + 80
+            px < -40 ||
+            px > width + 40 ||
+            py < -40 ||
+            py > height + 40
           ) {
             particles[i] = spawnParticle();
             continue;
           }
 
-          // Draw smoothly curved streamline ribbon
+          // Draw delicate, curved organic wind arc
           if (p.trail.length >= 2) {
             const lifeProgress = p.age / p.maxAge;
-            const alpha = Math.sin(lifeProgress * Math.PI);
+            const alpha = Math.sin(lifeProgress * Math.PI) * 0.85;
 
             ctx.beginPath();
             ctx.moveTo(p.trail[0][0], p.trail[0][1]);
@@ -363,12 +358,12 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
               ctx.lineTo(p.trail[j][0], p.trail[j][1]);
             }
 
-            // Authentic bright lime/emerald glowing streamline stroke
+            // Authentic delicate emerald green streamline
             ctx.strokeStyle =
               activeTab === 'cyclone'
-                ? `rgba(251, 146, 60, ${alpha * 0.85})`
-                : `rgba(74, 222, 128, ${alpha * 0.92})`;
-            ctx.lineWidth = 1.35;
+                ? `rgba(251, 146, 60, ${alpha * 0.8})`
+                : `rgba(34, 197, 94, ${alpha})`;
+            ctx.lineWidth = 1.0;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.stroke();
@@ -415,25 +410,7 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
           className="absolute inset-0 w-full h-full pointer-events-none z-10"
         />
 
-        {/* City Meteorological Points Overlay */}
-        <div className="absolute inset-0 z-20 pointer-events-none">
-          {cityData.map((city) => (
-            <div
-              key={city.name}
-              style={{
-                left: `${((city.lon - 68) / (98 - 68)) * 100}%`,
-                top: `${((36 - city.lat) / (36 - 8)) * 100}%`
-              }}
-              className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto cursor-pointer group"
-              onClick={() => setSelectedCity(city)}
-            >
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-white/90 shadow-md group-hover:scale-150 transition-transform" />
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 bg-black/80 backdrop-blur-xs text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap border border-white/20 pointer-events-none group-hover:bg-[#DF691A]">
-                {city.name}
-              </span>
-            </div>
-          ))}
-        </div>
+
 
         {/* 3. Floating Bottom-Right Frosted Glass Pill Menu (As in Reference Image) */}
         <div className="absolute bottom-5 right-5 z-30 bg-white/70 backdrop-blur-md px-3 py-2 rounded-full shadow-2xl border border-white/40 flex items-center gap-2">
