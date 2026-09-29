@@ -14,9 +14,9 @@ export const RadarLayer: React.FC<RadarLayerProps> = ({
   map,
   visible,
   radarPoints = [],
-  centerLat = 13.1,
-  centerLon = 79.7,
-  maxDbz = 52.0
+  centerLat,
+  centerLon,
+  maxDbz
 }) => {
   const [liveRadarPath, setLiveRadarPath] = useState<string | null>(null);
 
@@ -57,8 +57,35 @@ export const RadarLayer: React.FC<RadarLayerProps> = ({
     if (liveRadarPath) {
       const tileUrl = `https://tilecache.rainviewer.com${liveRadarPath}/256/{z}/{x}/{y}/4/1_1.png`;
 
+      // Check if style is loaded
+      if (!map.isStyleLoaded()) {
+        const onStyleLoad = () => {
+          if (!map.getSource(liveRasterSourceId)) {
+            map.addSource(liveRasterSourceId, {
+              type: 'raster',
+              tiles: [tileUrl],
+              tileSize: 256,
+              minzoom: 0,
+              maxzoom: 7,
+              attribution: 'Live Global Doppler Radar (RainViewer)'
+            });
+            map.addLayer({
+              id: liveRasterLayerId,
+              type: 'raster',
+              source: liveRasterSourceId,
+              paint: {
+                'raster-opacity': 0.85,
+                'raster-resampling': 'linear',
+                'raster-fade-duration': 200
+              }
+            });
+          }
+        };
+        map.once('styledata', onStyleLoad);
+        return;
+      }
+
       if (map.getSource(liveRasterSourceId)) {
-        // If source exists, update tile url by re-adding if path changed
         const existingLayer = map.getLayer(liveRasterLayerId);
         if (existingLayer) {
           map.setLayoutProperty(liveRasterLayerId, 'visibility', visible ? 'visible' : 'none');
@@ -70,7 +97,7 @@ export const RadarLayer: React.FC<RadarLayerProps> = ({
           tileSize: 256,
           minzoom: 0,
           maxzoom: 7,
-          attribution: 'RainViewer Live Doppler Radar'
+          attribution: 'Live Global Doppler Radar (RainViewer)'
         });
 
         map.addLayer({
@@ -80,7 +107,7 @@ export const RadarLayer: React.FC<RadarLayerProps> = ({
           paint: {
             'raster-opacity': 0.85,
             'raster-resampling': 'linear',
-            'raster-fade-duration': 300
+            'raster-fade-duration': 200
           }
         });
       }
@@ -111,21 +138,23 @@ export const RadarLayer: React.FC<RadarLayerProps> = ({
         { minDbz: 56, color: 'rgba(168, 85, 247, 0.95)', stroke: '#A855F7', radiusKm: 6 * pulseFactor, lobes: 2, noise: 0.15 },
       ];
 
-      for (const lvl of dbzLevels) {
-        if (maxDbz >= lvl.minDbz) {
-          const poly = createOrganicRadarCoords(centerLat, centerLon, lvl.radiusKm, lvl.lobes, lvl.noise);
-          features.push({
-            type: 'Feature' as const,
-            geometry: {
-              type: 'Polygon' as const,
-              coordinates: [poly]
-            },
-            properties: {
-              dbz: lvl.minDbz,
-              color: lvl.color,
-              stroke: lvl.stroke
-            }
-          });
+      if (centerLat && centerLon && maxDbz) {
+        for (const lvl of dbzLevels) {
+          if (maxDbz >= lvl.minDbz) {
+            const poly = createOrganicRadarCoords(centerLat, centerLon, lvl.radiusKm, lvl.lobes, lvl.noise);
+            features.push({
+              type: 'Feature' as const,
+              geometry: {
+                type: 'Polygon' as const,
+                coordinates: [poly]
+              },
+              properties: {
+                dbz: lvl.minDbz,
+                color: lvl.color,
+                stroke: lvl.stroke
+              }
+            });
+          }
         }
       }
 

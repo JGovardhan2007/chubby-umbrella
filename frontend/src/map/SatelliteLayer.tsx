@@ -12,8 +12,8 @@ interface SatelliteLayerProps {
 export const SatelliteLayer: React.FC<SatelliteLayerProps> = ({
   map,
   visible,
-  centerLat = 13.1,
-  centerLon = 79.7,
+  centerLat,
+  centerLon,
   minBtK = 215.0
 }) => {
   useEffect(() => {
@@ -21,6 +21,16 @@ export const SatelliteLayer: React.FC<SatelliteLayerProps> = ({
 
     const sourceId = 'satellite-tir-source';
     const layerId = 'satellite-tir-layer';
+
+    if (!centerLat || !centerLon) {
+      if (map.getSource(sourceId)) {
+        (map.getSource(sourceId) as maplibregl.GeoJSONSource).setData({
+          type: 'FeatureCollection',
+          features: []
+        });
+      }
+      return;
+    }
 
     // Simulated thermal infrared anvil cloud top buffer (cold core < 220K is deepest violet/blue)
     const features = [];

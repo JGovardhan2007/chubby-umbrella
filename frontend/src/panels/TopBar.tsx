@@ -1,29 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, MapPin, Navigation, ChevronDown, Crosshair } from 'lucide-react';
 import { SystemStatusData } from '../types/weather';
+import { ALL_INDIAN_LOCATIONS, LocationOption, MAJOR_RADAR_CITIES } from '../data/locations/indianLocations';
 
-export interface LocationOption {
-  name: string;
-  state: string;
-  lat: number;
-  lon: number;
-  radarStation: string;
-}
-
-export const MAJOR_RADAR_CITIES: LocationOption[] = [
-  { name: 'Chennai', state: 'Tamil Nadu', lat: 13.0827, lon: 80.2707, radarStation: 'DWR Chennai (Port)' },
-  { name: 'Bengaluru', state: 'Karnataka', lat: 12.9716, lon: 77.5946, radarStation: 'DWR Bengaluru' },
-  { name: 'Mumbai', state: 'Maharashtra', lat: 19.0760, lon: 72.8777, radarStation: 'DWR Mumbai (Colaba)' },
-  { name: 'Delhi NCR', state: 'Delhi', lat: 28.6139, lon: 77.2090, radarStation: 'DWR Delhi (Palam)' },
-  { name: 'Hyderabad', state: 'Telangana', lat: 17.3850, lon: 78.4867, radarStation: 'DWR Hyderabad' },
-  { name: 'Kolkata', state: 'West Bengal', lat: 22.5726, lon: 88.3639, radarStation: 'DWR Kolkata' },
-  { name: 'Pune', state: 'Maharashtra', lat: 18.5204, lon: 73.8567, radarStation: 'DWR Pune (Pashan)' },
-  { name: 'Ahmedabad', state: 'Gujarat', lat: 23.0225, lon: 72.5714, radarStation: 'DWR Ahmedabad' },
-  { name: 'Tirupati', state: 'Andhra Pradesh', lat: 13.6288, lon: 79.4192, radarStation: 'DWR Sriharikota / Tirupati' },
-  { name: 'Kochi', state: 'Kerala', lat: 9.9312, lon: 76.2673, radarStation: 'DWR Kochi' },
-  { name: 'Jaipur', state: 'Rajasthan', lat: 26.9124, lon: 75.7873, radarStation: 'DWR Jaipur' },
-  { name: 'Bhubaneswar', state: 'Odisha', lat: 20.2961, lon: 85.8245, radarStation: 'DWR Paradip / BBSR' }
-];
+export type { LocationOption };
+export { MAJOR_RADAR_CITIES, ALL_INDIAN_LOCATIONS };
 
 interface TopBarProps {
   systemStatus: SystemStatusData | null;
@@ -66,7 +47,7 @@ export const TopBar: React.FC<TopBarProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const filteredCities = MAJOR_RADAR_CITIES.filter((c) =>
+  const filteredCities = ALL_INDIAN_LOCATIONS.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.state.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.radarStation.toLowerCase().includes(searchQuery.toLowerCase())
