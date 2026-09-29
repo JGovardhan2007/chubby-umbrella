@@ -38,6 +38,7 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
 
+  const [isMapReady, setIsMapReady] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'rain' | 'wind' | 'clouds' | 'cyclone' | 'temp'>('wind');
   const [cityData, setCityData] = useState<CityPoint[]>(INDIAN_CITIES);
   const [selectedCity, setSelectedCity] = useState<CityPoint | null>(null);
@@ -138,6 +139,7 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
 
     map.on('load', () => {
       mapRef.current = map;
+      setIsMapReady(true);
       fetchLiveWeather();
     });
 
@@ -181,7 +183,7 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
         map.setLayoutProperty(layerId, 'visibility', 'none');
       }
     }
-  }, [activeTab, liveRadarPath]);
+  }, [activeTab, liveRadarPath, isMapReady]);
 
   // 5. Realistic Animated Green Wind Streamlines over Satellite Map
   useEffect(() => {
@@ -386,7 +388,7 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', handleResize);
     };
-  }, [activeTab]);
+  }, [activeTab, isMapReady]);
 
   return (
     <div className="rounded-2xl overflow-hidden border-4 border-[#DF691A] shadow-2xl flex flex-col h-[600px] relative bg-[#091722] font-sans">
