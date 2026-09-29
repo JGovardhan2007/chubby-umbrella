@@ -134,6 +134,8 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
       minZoom: 3.5,
       maxZoom: 9,
       pitch: 0,
+      scrollZoom: false, // Prevents accidental zoom attack when scrolling the page
+      dragRotate: false,
       attributionControl: false
     });
 
@@ -337,42 +339,35 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
             py = (35 - p.lat) * (ch / 30);
           }
 
-          p.trail.push([px, py]);
-          if (p.trail.length > 7) {
-            p.trail.shift();
-          }
-
           if (
             p.age >= p.maxAge ||
-            px < -50 ||
-            px > cw + 50 ||
-            py < -50 ||
-            py > ch + 50
+            px < -30 ||
+            px > cw + 30 ||
+            py < -30 ||
+            py > ch + 30
           ) {
             particles[i] = spawnParticle();
             continue;
           }
 
-          if (p.trail.length >= 2) {
-            const lifeProgress = p.age / p.maxAge;
-            const alpha = Math.sin(lifeProgress * Math.PI) * 0.92;
+          // Draw instantaneous smooth atmospheric streamline
+          const angle = Math.atan2(v, u);
+          const tailLen = 13.5;
+          const lifeProgress = p.age / p.maxAge;
+          const alpha = Math.sin(lifeProgress * Math.PI) * 0.90;
 
-            ctx.beginPath();
-            ctx.moveTo(p.trail[0][0], p.trail[0][1]);
-            for (let j = 1; j < p.trail.length; j++) {
-              ctx.lineTo(p.trail[j][0], p.trail[j][1]);
-            }
+          ctx.beginPath();
+          ctx.moveTo(px, py);
+          ctx.lineTo(px - Math.cos(angle) * tailLen, py + Math.sin(angle) * tailLen);
 
-            // Glowing vibrant neon green streamline stroke
-            ctx.strokeStyle =
-              activeTab === 'cyclone'
-                ? `rgba(249, 115, 22, ${alpha * 0.85})`
-                : `rgba(34, 197, 94, ${alpha})`;
-            ctx.lineWidth = 1.25;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.stroke();
-          }
+          // Glowing vibrant neon green streamline stroke
+          ctx.strokeStyle =
+            activeTab === 'cyclone'
+              ? `rgba(249, 115, 22, ${alpha * 0.85})`
+              : `rgba(34, 197, 94, ${alpha})`;
+          ctx.lineWidth = 1.25;
+          ctx.lineCap = 'round';
+          ctx.stroke();
         }
       }
 
