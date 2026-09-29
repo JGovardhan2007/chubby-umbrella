@@ -13,8 +13,14 @@ import { StormCell } from './types/storm';
 import { HorizonMinutes, SiteEtaSummary } from './types/forecast';
 import { apiService, StepDataResponse } from './services/api';
 import { DEMO_REPLAY_FRAMES } from './data/demo/demoData';
+import { GovHeader } from './home/GovHeader';
+import { PortalNavBar } from './home/PortalNavBar';
+import { HomePage } from './home/HomePage';
 
 export const App: React.FC = () => {
+  // Navigation state: 'home' (NCMRWF/IMD Portal) or 'map' (Convective GIS Dashboard)
+  const [activeTab, setActiveTab] = useState<'home' | 'map'>('home');
+
   // Operational state
   const [mode, setMode] = useState<'replay' | 'live' | 'demo'>('replay');
   const [selectedHorizon, setSelectedHorizon] = useState<HorizonMinutes>(0);
@@ -244,105 +250,135 @@ export const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[#F8FAFC] text-slate-800 overflow-hidden font-sans">
-      {/* 1. TOP BAR */}
-      <TopBar
-        systemStatus={systemStatus}
-        mode={mode}
-        onModeChange={handleModeChange}
-        currentTimeLabel={timeLabel}
+      {/* 1. Official Government Header (NCMRWF & IMD) */}
+      <GovHeader />
+
+      {/* 2. Top Navigation Bar with Home and Nowcast Map tabs */}
+      <PortalNavBar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
         isBackendConnected={isBackendConnected}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onSelectCity={handleSelectCity}
-        onUseGPS={handleUseGPS}
-        currentLocationName={currentCity.name}
       />
 
-      {/* 2. MAIN CONTENT AREA (Left Sidebar + Large Map + Right Info Panel) */}
-      <div className="flex flex-1 min-h-0 overflow-hidden relative">
-        {/* LEFT SIDEBAR: Detail Filters, Search & Categories (280px) */}
-        <aside className="w-72 bg-white border-r border-slate-200 flex flex-col shrink-0 z-10 shadow-xs">
-          <DataSourcePanel
+      {/* 3. Conditional Page View: Home Portal vs. Convective Nowcasting GIS Map */}
+      {activeTab === 'home' ? (
+        <HomePage
+          onNavigateToMap={(city) => {
+            if (city) {
+              handleSelectCity({
+                name: city.name,
+                lat: city.lat,
+                lon: city.lon
+              });
+            }
+            setActiveTab('map');
+          }}
+        />
+      ) : (
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+          {/* MAP TOP BAR (Search, City Dropdown, GPS, Live/Replay mode) */}
+          <TopBar
             systemStatus={systemStatus}
             mode={mode}
+            onModeChange={handleModeChange}
+            currentTimeLabel={timeLabel}
+            isBackendConnected={isBackendConnected}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onSelectCity={handleSelectCity}
+            onUseGPS={handleUseGPS}
+            currentLocationName={currentCity.name}
+            onReturnHome={() => setActiveTab('home')}
           />
-          <LayerControl
-            layers={layers}
-            onToggleLayer={handleToggleLayer}
-          />
-        </aside>
 
-        {/* CENTER: MAIN GIS MAP + BOTTOM CONVECTIVE CARDS */}
-        <main className="flex-1 relative flex flex-col h-full overflow-hidden bg-[#F1F5F9]">
-          <div className="flex-1 relative overflow-hidden">
-            <MapView
-              layers={layers}
-              onToggleLayer={handleToggleLayer}
-              storms={stepData?.storms || []}
-              selectedStorm={selectedStorm}
-              onSelectStorm={setSelectedStorm}
-              selectedHorizon={selectedHorizon}
-              siteEta={stepData?.siteEta || null}
-              radarPoints={stepData?.radarPoints}
-              lightningFlashes={stepData?.lightningFlashes}
-              onLocateMe={handleUseGPS}
-              onSelectCity={handleSelectCity}
-              onMapClickLocation={(lat, lon) => {
-                if (mode === 'live') {
-                  apiService.getLiveNowcast(lat, lon, currentCity.name).then(setStepData);
-                }
-              }}
-            />
+          {/* MAIN GIS MAP WORKSPACE (Sidebar + MapView + Right Hazard Details) */}
+          <div className="flex flex-1 min-h-0 overflow-hidden relative">
+            {/* LEFT SIDEBAR: Detail Filters, Search & Categories (280px) */}
+            <aside className="w-72 bg-white border-r border-slate-200 flex flex-col shrink-0 z-10 shadow-xs">
+              <DataSourcePanel
+                systemStatus={systemStatus}
+                mode={mode}
+              />
+              <LayerControl
+                layers={layers}
+                onToggleLayer={handleToggleLayer}
+              />
+            </aside>
+
+            {/* CENTER: MAIN GIS MAP + BOTTOM CONVECTIVE CARDS */}
+            <main className="flex-1 relative flex flex-col h-full overflow-hidden bg-[#F1F5F9]">
+              <div className="flex-1 relative overflow-hidden">
+                <MapView
+                  layers={layers}
+                  onToggleLayer={handleToggleLayer}
+                  storms={stepData?.storms || []}
+                  selectedStorm={selectedStorm}
+                  onSelectStorm={setSelectedStorm}
+                  selectedHorizon={selectedHorizon}
+                  siteEta={stepData?.siteEta || null}
+                  radarPoints={stepData?.radarPoints}
+                  lightningFlashes={stepData?.lightningFlashes}
+                  onLocateMe={handleUseGPS}
+                  onSelectCity={handleSelectCity}
+                  onMapClickLocation={(lat, lon) => {
+                    if (mode === 'live') {
+                      apiService.getLiveNowcast(lat, lon, currentCity.name).then(setStepData);
+                    }
+                  }}
+                />
+              </div>
+
+              {/* BOTTOM CONVECTIVE CARDS */}
+              <ConvectiveCards
+                storms={stepData?.storms || []}
+                selectedStorm={selectedStorm}
+                onSelectStorm={setSelectedStorm}
+                cityName={currentCity.name}
+              />
+            </main>
+
+            {/* RIGHT INFORMATION PANEL (320px) */}
+            <aside className="w-80 bg-white border-l border-slate-200 flex flex-col shrink-0 z-10 shadow-xs">
+              {selectedStorm ? (
+                <StormDetails
+                  storm={selectedStorm}
+                  siteEta={stepData?.siteEta || null}
+                  onClose={() => setSelectedStorm(null)}
+                />
+              ) : null}
+
+              <HazardSummary
+                hazardSummary={stepData?.hazardSummary || { lightning: 0, hail: 0, downburst: 0, cloudburst: 0 }}
+                activeStormCount={stepData?.activeStormCount || 0}
+                highRiskRegions={stepData?.highRiskRegions || 0}
+                siteEta={stepData?.siteEta || null}
+                mode={mode}
+              />
+
+              <div className="p-3 border-t border-slate-100 bg-white">
+                <ModelComparison />
+              </div>
+            </aside>
           </div>
 
-          {/* BOTTOM CONVECTIVE CARDS */}
-          <ConvectiveCards
-            storms={stepData?.storms || []}
-            selectedStorm={selectedStorm}
-            onSelectStorm={setSelectedStorm}
-            cityName={currentCity.name}
+          {/* BOTTOM FORECAST TIMELINE */}
+          <ForecastTimeline
+            selectedHorizon={selectedHorizon}
+            onHorizonChange={setSelectedHorizon}
+            isPlaying={isPlaying}
+            onTogglePlay={() => setIsPlaying(!isPlaying)}
+            onRestart={handleRestart}
+            replaySpeed={replaySpeed}
+            onSpeedChange={setReplaySpeed}
+            currentTimeLabel={timeLabel}
+            isLiveMode={mode === 'live'}
           />
-        </main>
-
-        {/* RIGHT INFORMATION PANEL (320px) */}
-        <aside className="w-80 bg-white border-l border-slate-200 flex flex-col shrink-0 z-10 shadow-xs">
-          {selectedStorm ? (
-            <StormDetails
-              storm={selectedStorm}
-              siteEta={stepData?.siteEta || null}
-              onClose={() => setSelectedStorm(null)}
-            />
-          ) : null}
-
-          <HazardSummary
-            hazardSummary={stepData?.hazardSummary || { lightning: 0, hail: 0, downburst: 0, cloudburst: 0 }}
-            activeStormCount={stepData?.activeStormCount || 0}
-            highRiskRegions={stepData?.highRiskRegions || 0}
-            siteEta={stepData?.siteEta || null}
-            mode={mode}
-          />
-
-          <div className="p-3 border-t border-slate-100 bg-white">
-            <ModelComparison />
-          </div>
-        </aside>
-      </div>
-
-      {/* 3. BOTTOM FORECAST TIMELINE */}
-      <ForecastTimeline
-        selectedHorizon={selectedHorizon}
-        onHorizonChange={setSelectedHorizon}
-        isPlaying={isPlaying}
-        onTogglePlay={() => setIsPlaying(!isPlaying)}
-        onRestart={handleRestart}
-        replaySpeed={replaySpeed}
-        onSpeedChange={setReplaySpeed}
-        currentTimeLabel={timeLabel}
-        isLiveMode={mode === 'live'}
-      />
+        </div>
+      )}
     </div>
   );
 };
 
 export default App;
+
 

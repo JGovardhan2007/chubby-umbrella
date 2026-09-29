@@ -36,6 +36,7 @@ interface TopBarProps {
   onSelectCity?: (loc: LocationOption) => void;
   onUseGPS?: () => void;
   currentLocationName?: string;
+  onReturnHome?: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -48,7 +49,8 @@ export const TopBar: React.FC<TopBarProps> = ({
   onSearchChange,
   onSelectCity,
   onUseGPS,
-  currentLocationName = 'Chennai'
+  currentLocationName = 'Chennai',
+  onReturnHome
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -94,20 +96,34 @@ export const TopBar: React.FC<TopBarProps> = ({
     <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between z-30 select-none shadow-xs">
       {/* 1. Left: Weather Intelligence Header */}
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl overflow-hidden border border-slate-200 shadow-sm flex items-center justify-center shrink-0 bg-slate-900">
-          <img
-            src="/favicon.png"
-            alt="Convective Nowcast Logo"
-            className="w-full h-full object-cover scale-105"
-          />
-        </div>
-        <div className="flex flex-col">
-          <span className="text-base font-bold tracking-tight text-slate-900 font-sans leading-none">
-            Convective Nowcast
-          </span>
-          <span className="text-[11px] font-medium text-slate-500 mt-0.5">
-            Severe Storm, Hail & Cloudburst Intelligence
-          </span>
+        {onReturnHome && (
+          <button
+            onClick={onReturnHome}
+            title="Return to NCMRWF & IMD Portal Home"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-bold transition-colors"
+          >
+            <span>← मुख्य पृष्ठ (Home)</span>
+          </button>
+        )}
+        <div
+          onClick={onReturnHome}
+          className={`flex items-center gap-3 ${onReturnHome ? 'cursor-pointer group' : ''}`}
+        >
+          <div className="w-9 h-9 rounded-xl overflow-hidden border border-slate-200 shadow-sm flex items-center justify-center shrink-0 bg-slate-900 group-hover:ring-2 group-hover:ring-amber-500 transition-all">
+            <img
+              src="/favicon.png"
+              alt="Convective Nowcast Logo"
+              className="w-full h-full object-cover scale-105"
+            />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-base font-bold tracking-tight text-slate-900 font-sans leading-none group-hover:text-amber-700 transition-colors">
+              Convective Nowcast
+            </span>
+            <span className="text-[11px] font-medium text-slate-500 mt-0.5">
+              Severe Storm, Hail & Cloudburst Intelligence
+            </span>
+          </div>
         </div>
       </div>
 
