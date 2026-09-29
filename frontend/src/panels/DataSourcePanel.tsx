@@ -1,5 +1,5 @@
 import React from 'react';
-import { Database, Radio, CheckCircle, AlertTriangle } from 'lucide-react';
+import { SlidersHorizontal, Radio, Database, CheckCircle2 } from 'lucide-react';
 import { SystemStatusData } from '../types/weather';
 
 interface DataSourcePanelProps {
@@ -14,53 +14,26 @@ export const DataSourcePanel: React.FC<DataSourcePanelProps> = ({
   const isLive = mode === 'live';
 
   return (
-    <div className="bg-[#111827] border-b border-[#1F293D] p-3 text-xs select-none">
-      {/* Header & Source Mode Badge */}
-      <div className="flex items-center justify-between mb-2">
-        <span className="font-mono text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-          <Database className="w-3.5 h-3.5 text-sky-400" />
-          DATA SOURCES
-        </span>
-        
-        {/* Explicit Mandatory Label: REPLAY DATA vs LIVE */}
-        <span className={`font-mono text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${
-          isLive
-            ? 'bg-emerald-950/80 border-emerald-700/80 text-emerald-400'
-            : 'bg-amber-950/80 border-amber-700/80 text-amber-400'
+    <div className="p-4 bg-white border-b border-slate-100 select-none">
+      {/* Detail Filters Button (Exact replica from the reference UI) */}
+      <button
+        className="w-full py-2.5 px-4 rounded-xl border-2 border-amber-500/80 bg-amber-50/50 hover:bg-amber-100/70 text-amber-700 font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.99]"
+      >
+        <SlidersHorizontal className="w-4 h-4 text-amber-600" />
+        <span>Detail Filters</span>
+      </button>
+
+      {/* Sensor Ingestion Health Status */}
+      <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500 bg-slate-50 border border-slate-200/80 rounded-lg px-2.5 py-1.5 font-sans">
+        <div className="flex items-center gap-1.5">
+          <Database className="w-3.5 h-3.5 text-amber-500" />
+          <span className="font-medium text-slate-700">Live Ingestion:</span>
+        </div>
+        <span className={`font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+          isLive ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
         }`}>
-          {isLive ? 'LIVE OPERATIONAL' : 'REPLAY DATA'}
+          {isLive ? 'ACTIVE LIVE' : 'SYNTHETIC REPLAY'}
         </span>
-      </div>
-
-      {/* Sources List */}
-      <div className="space-y-1.5 text-[11px]">
-        <div className="flex items-center justify-between bg-[#0B0F19] px-2 py-1.5 rounded border border-[#1F293D]/60">
-          <span className="text-slate-300 font-medium">Radar (DWR)</span>
-          <span className="flex items-center gap-1 text-emerald-400 font-mono text-[10px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Available
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between bg-[#0B0F19] px-2 py-1.5 rounded border border-[#1F293D]/60">
-          <span className="text-slate-300 font-medium">Satellite (INSAT-3D)</span>
-          <span className="flex items-center gap-1 text-emerald-400 font-mono text-[10px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Available
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between bg-[#0B0F19] px-2 py-1.5 rounded border border-[#1F293D]/60">
-          <span className="text-slate-300 font-medium">Lightning (LLN)</span>
-          <span className="flex items-center gap-1 text-emerald-400 font-mono text-[10px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Available
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between bg-[#0B0F19] px-2 py-1.5 rounded border border-[#1F293D]/60">
-          <span className="text-slate-300 font-medium">Surface AWS</span>
-          <span className="flex items-center gap-1 text-emerald-400 font-mono text-[10px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Available
-          </span>
-        </div>
       </div>
     </div>
   );

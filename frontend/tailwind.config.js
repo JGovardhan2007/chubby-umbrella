@@ -7,25 +7,38 @@ export default {
   theme: {
     extend: {
       colors: {
+        brand: {
+          50: '#FFFBEB',
+          100: '#FEF3C7',
+          200: '#FDE68A',
+          300: '#FCD34D',
+          400: '#FBBF24',
+          500: '#F59E0B',
+          600: '#D97706',
+          700: '#B45309',
+          800: '#92400E',
+          900: '#78350F',
+          orange: '#EA580C',
+        },
         met: {
-          bg: '#0B0F19',
-          card: '#111827',
-          cardSubtle: '#161F30',
-          border: '#1F293D',
-          borderLight: '#334155',
-          textPrimary: '#F1F5F9',
-          textSecondary: '#94A3B8',
-          textMuted: '#64748B',
-          accent: '#38BDF8',
-          radarGreen: '#22C55E',
-          radarYellow: '#EAB308',
-          radarRed: '#EF4444',
-          radarPurple: '#A855F7',
-          ltg: '#06B6D4'
+          bg: '#F8FAFC',
+          card: '#FFFFFF',
+          cardSubtle: '#F1F5F9',
+          border: '#E2E8F0',
+          borderLight: '#CBD5E1',
+          textPrimary: '#0F172A',
+          textSecondary: '#475569',
+          textMuted: '#94A3B8',
+          accent: '#EA580C',
+          radarGreen: '#16A34A',
+          radarYellow: '#D97706',
+          radarRed: '#DC2626',
+          radarPurple: '#9333EA',
+          ltg: '#0284C7'
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
         mono: ['JetBrains Mono', 'Roboto Mono', 'monospace'],
       }
     },

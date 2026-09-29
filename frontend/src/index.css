@@ -4,44 +4,61 @@
 
 @layer base {
   body {
-    @apply bg-[#0B0F19] text-slate-100 font-sans;
+    @apply bg-[#F8FAFC] text-slate-800 font-sans antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
-/* Custom Scrollbar for sleek control-room layout */
+/* Custom Scrollbar for sleek modern layout */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B0F19;
+  background: #F1F5F9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1F293D;
-  border-radius: 3px;
+  background: #CBD5E1;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #94A3B8;
 }
 
 .maplibregl-popup-content {
-  background-color: #111827 !important;
-  color: #F8FAFC !important;
-  border: 1px solid #1F293D !important;
-  border-radius: 6px !important;
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 8px !important;
   padding: 8px 12px !important;
-  font-family: 'Inter', sans-serif !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
   font-size: 11px !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05) !important;
 }
 
 .maplibregl-popup-anchor-top .maplibregl-popup-tip {
-  border-bottom-color: #111827 !important;
+  border-bottom-color: #FFFFFF !important;
 }
 .maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
-  border-top-color: #111827 !important;
+  border-top-color: #FFFFFF !important;
+}
+
+/* Ensure crisp dark / black pointer & default cursor on map canvas */
+.maplibregl-canvas,
+.maplibregl-canvas-container,
+.maplibregl-canvas-container.maplibregl-interactive,
+.maplibregl-canvas-container.maplibregl-touch-zoom-rotate.maplibregl-touch-drag-pan {
+  cursor: default !important;
+}
+
+.maplibregl-canvas-container.maplibregl-interactive:active {
+  cursor: grabbing !important;
+}
+
+.maplibregl-ctrl-group button,
+.maplibregl-marker {
+  cursor: pointer !important;
 }

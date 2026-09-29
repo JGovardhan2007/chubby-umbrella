@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
+import { Sun, Zap, RotateCcw, Plus, Minus, Layers, CloudRain, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
 import { LayerToggleState } from '../types/weather';
 import { StormCell } from '../types/storm';
 import { HorizonMinutes, SiteEtaSummary } from '../types/forecast';
+import { DraggableWidget } from '../panels/DraggableWidget';
 import { RadarLayer } from './RadarLayer';
 import { SatelliteLayer } from './SatelliteLayer';
 import { LightningLayer } from './LightningLayer';
@@ -12,8 +14,11 @@ import { HazardLayer } from './HazardLayer';
 import { AnomalyLayer } from '../anomaly/AnomalyLayer';
 import { MapLegend } from './MapLegend';
 
+import { MapDetailsDrawer } from './MapDetailsDrawer';
+
 interface MapViewProps {
   layers: LayerToggleState;
+  onToggleLayer?: (key: keyof LayerToggleState) => void;
   storms: StormCell[];
   selectedStorm: StormCell | null;
   onSelectStorm: (storm: StormCell | null) => void;
@@ -26,6 +31,7 @@ interface MapViewProps {
 
 export const MapView: React.FC<MapViewProps> = ({
   layers,
+  onToggleLayer,
   storms,
   selectedStorm,
   onSelectStorm,
@@ -39,21 +45,20 @@ export const MapView: React.FC<MapViewProps> = ({
   const [map, setMap] = useState<maplibregl.Map | null>(null);
   const siteMarkerRef = useRef<maplibregl.Marker | null>(null);
 
+  const [isCellAccordionOpen, setIsCellAccordionOpen] = useState(true);
+
+  // Initialize MapLibre GL Positron (Light) Base Map
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    // Initialize MapLibre GL Dark Matter map centered over South India / Chennai testbed
     const mapInstance = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-      center: [80.0, 13.1],
-      zoom: 8.5,
+      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+      center: [80.12, 13.08],
+      zoom: 9.0,
       pitch: 0,
       attributionControl: false
     });
-
-    mapInstance.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
-    mapInstance.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left');
 
     mapInstance.on('load', () => {
       setMap(mapInstance);
@@ -82,15 +87,18 @@ export const MapView: React.FC<MapViewProps> = ({
         const el = document.createElement('div');
         el.className = 'site-marker-pin';
         el.innerHTML = `
-          <div class="relative flex items-center justify-center">
-            <div class="w-4 h-4 rounded-full bg-sky-500 border-2 border-white shadow-lg animate-pulse"></div>
-            <div class="absolute w-8 h-8 rounded-full bg-sky-400/30"></div>
+          <div class="relative flex items-center justify-center cursor-pointer group">
+            <div class="w-5 h-5 rounded-full bg-amber-500 border-2 border-white shadow-md flex items-center justify-center text-white">
+              <span class="w-2 h-2 rounded-full bg-white"></span>
+            </div>
+            <div class="absolute -bottom-6 bg-slate-900 text-white text-[10px] font-sans font-semibold px-2 py-0.5 rounded shadow-md whitespace-nowrap">
+              ${label}
+            </div>
           </div>
         `;
 
         siteMarkerRef.current = new maplibregl.Marker({ element: el })
           .setLngLat([longitude, latitude])
-          .setPopup(new maplibregl.Popup({ offset: 15 }).setText(`Target Site: ${label}`))
           .addTo(map);
       } else {
         siteMarkerRef.current.setLngLat([longitude, latitude]);
@@ -98,64 +106,309 @@ export const MapView: React.FC<MapViewProps> = ({
     }
   }, [map, siteEta]);
 
-  const primaryStorm = storms[0];
+  const handleZoomIn = () => map?.zoomIn();
+  const handleZoomOut = () => map?.zoomOut();
+  const handleReset = () => {
+    map?.flyTo({ center: [80.12, 13.08], zoom: 9.0 });
+  };
+
+  const [selectedBasemap, setSelectedBasemap] = useState<'positron' | 'satellite' | 'voyager' | 'dark'>('positron');
+  const [isLayerMenuOpen, setIsLayerMenuOpen] = useState(false);
+  const [styleVersion, setStyleVersion] = useState(0);
+
+  const BASEMAPS = [
+    {
+      id: 'positron' as const,
+      name: 'Default',
+      desc: 'Clean vector streets',
+      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+    },
+    {
+      id: 'satellite' as const,
+      name: 'Satellite',
+      desc: 'High-res earth imagery',
+      style: {
+        version: 8,
+        sources: {
+          'esri-imagery': {
+            type: 'raster',
+            tiles: [
+              'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+            ],
+            tileSize: 256,
+            attribution: 'Esri, Maxar'
+          }
+        },
+        layers: [
+          {
+            id: 'esri-imagery-layer',
+            type: 'raster',
+            source: 'esri-imagery',
+            minzoom: 0,
+            maxzoom: 19
+          }
+        ]
+      }
+    },
+    {
+      id: 'voyager' as const,
+      name: 'Terrain',
+      desc: 'Topography & relief',
+      style: {
+        version: 8,
+        sources: {
+          'esri-topo': {
+            type: 'raster',
+            tiles: [
+              'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
+            ],
+            tileSize: 256,
+            attribution: 'Esri, USGS'
+          }
+        },
+        layers: [
+          {
+            id: 'esri-topo-layer',
+            type: 'raster',
+            source: 'esri-topo',
+            minzoom: 0,
+            maxzoom: 19
+          }
+        ]
+      }
+    },
+    {
+      id: 'dark' as const,
+      name: 'Dark Matter',
+      desc: 'Nocturnal contrast',
+      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+    }
+  ];
+
+  const handleSelectBasemap = (bm: typeof BASEMAPS[0]) => {
+    if (!map) return;
+    if (selectedBasemap === bm.id) return;
+    setSelectedBasemap(bm.id);
+
+    // Listen for style load to refresh meteorological GeoJSON layers
+    const onStyleData = () => {
+      if (map.isStyleLoaded()) {
+        map.off('styledata', onStyleData);
+        setStyleVersion((prev) => prev + 1);
+      }
+    };
+    map.on('styledata', onStyleData);
+    map.setStyle(bm.style as any);
+  };
+
+  const primaryStorm = selectedStorm || storms[0];
 
   return (
-    <div className="relative w-full h-full bg-[#0B0F19] overflow-hidden flex-1">
+    <div className="relative w-full h-full bg-[#F1F5F9] overflow-hidden flex-1">
       {/* Map Container */}
       <div ref={mapContainerRef} className="w-full h-full" />
 
-      {/* Modular Meteorological Layer Implementations */}
-      <RadarLayer
-        map={map}
-        visible={layers.radarReflectivity}
-        radarPoints={radarPoints}
-        centerLat={primaryStorm?.centroid_lat}
-        centerLon={primaryStorm?.centroid_lon}
-        maxDbz={primaryStorm?.intensity}
-      />
+      {/* 1. TOP FLOATING QUICK PILLS (Matching Mockup: Weather, Transportation / Lightning) */}
+      <div className="absolute top-4 left-6 z-20 flex items-center gap-2.5">
+        <div className="flex items-center gap-2 bg-white/95 backdrop-blur-sm border border-slate-200/90 rounded-full px-3.5 py-1.5 shadow-sm text-xs font-semibold text-slate-700 hover:bg-white cursor-pointer transition-all">
+          <Sun className="w-3.5 h-3.5 text-amber-500" />
+          <span>Weather Live</span>
+        </div>
 
-      <SatelliteLayer
-        map={map}
-        visible={layers.satelliteIR}
-        centerLat={primaryStorm?.centroid_lat}
-        centerLon={primaryStorm?.centroid_lon}
-        minBtK={primaryStorm?.indicators?.min_bt_k}
-      />
+        <div className="flex items-center gap-2 bg-white/95 backdrop-blur-sm border border-slate-200/90 rounded-full px-3.5 py-1.5 shadow-sm text-xs font-semibold text-slate-700 hover:bg-white cursor-pointer transition-all">
+          <Zap className="w-3.5 h-3.5 text-amber-500" />
+          <span>Lightning Hub</span>
+        </div>
+      </div>
 
-      <LightningLayer
-        map={map}
-        visible={layers.lightningFlashes}
-        flashes={lightningFlashes}
-      />
+      {/* 2. TOP RIGHT FLOATING RESET BUTTON (Matching Mockup: "Reset") */}
+      <div className="absolute top-4 right-6 z-20">
+        <button
+          onClick={handleReset}
+          className="flex items-center gap-1.5 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-lg px-3 py-1.5 shadow-sm text-xs font-semibold text-slate-700 hover:bg-white hover:border-slate-300 transition-all active:scale-95"
+        >
+          <RotateCcw className="w-3.5 h-3.5 text-slate-600" />
+          <span>Reset</span>
+        </button>
+      </div>
 
-      <StormLayer
-        map={map}
-        visible={layers.stormCells}
-        storms={storms}
-        selectedStormId={selectedStorm?.storm_id || null}
-        onSelectStorm={(s) => onSelectStorm(s)}
-      />
+      {/* 3. RIGHT FLOATING MAP NAVIGATION CONTROLS & MAP DETAILS DRAWER */}
+      <div className="absolute right-6 top-16 z-30 flex items-start gap-3">
+        {/* Google Maps Style Map Details Drawer (Opens BESIDE the layer button to the left) */}
+        <MapDetailsDrawer
+          isOpen={isLayerMenuOpen}
+          onClose={() => setIsLayerMenuOpen(false)}
+          selectedBasemap={selectedBasemap}
+          onSelectBasemap={(bm) => {
+            const match = BASEMAPS.find((b) => b.id === bm);
+            if (match) handleSelectBasemap(match);
+          }}
+          layers={layers}
+          onToggleLayer={onToggleLayer}
+        />
 
-      <TrackLayer
-        map={map}
-        visible={layers.stormTracks}
-        storms={storms}
-        selectedHorizon={selectedHorizon}
-      />
+        {/* Navigation Control Bar */}
+        <div className="bg-white/95 backdrop-blur-sm border border-slate-200 rounded-xl shadow-md flex flex-col overflow-hidden">
+          <button
+            onClick={() => setIsLayerMenuOpen(!isLayerMenuOpen)}
+            title="Map details & layers"
+            className={`p-2.5 transition-colors border-b border-slate-100 flex items-center justify-center ${
+              isLayerMenuOpen
+                ? 'bg-amber-500 text-white shadow-inner'
+                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+          </button>
+          <button
+            onClick={handleZoomIn}
+            title="Zoom In"
+            className="p-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-b border-slate-100 flex items-center justify-center transition-colors"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+          </button>
+          <button
+            onClick={handleZoomOut}
+            title="Zoom Out"
+            className="p-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 flex items-center justify-center transition-colors"
+          >
+            <Minus className="w-4 h-4 stroke-[2.5]" />
+          </button>
+        </div>
+      </div>
 
-      <HazardLayer
-        map={map}
-        visible={layers.hazardZones}
-        storms={storms}
-      />
+      {/* 4. DRAGGABLE & RESIZABLE CONVECTIVE CELLS CARD */}
+      <DraggableWidget
+        id="convective-cells-widget"
+        title="Convective Cells"
+        defaultPosition={{ x: 24, y: 70 }}
+        defaultWidth={260}
+        minWidth={220}
+        maxWidth={460}
+        collapsible={true}
+      >
+        <div className="space-y-2 select-none">
+          {/* Active Expanded Card */}
+          <div className="rounded-lg border-2 border-amber-400/90 bg-white p-2.5 shadow-xs">
+            <div className="flex items-center justify-between font-bold text-slate-900 mb-2">
+              <span className="truncate">{primaryStorm?.storm_id || 'Cell #01 - Supercell'}</span>
+              <ChevronUp className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            </div>
 
-      <AnomalyLayer
-        map={map}
-        visible={layers.extremeAnomalies}
-      />
+            {/* Progress bars (Hail risk & Wind gusts) */}
+            <div className="space-y-1.5">
+              {/* Hail Risk (Magenta) */}
+              <div className="flex h-5 w-full rounded bg-slate-100 overflow-hidden font-mono text-[10px] text-white">
+                <div
+                  className="bg-purple-600 flex items-center justify-center px-1.5 font-bold transition-all duration-500"
+                  style={{ width: `${Math.min(100, (primaryStorm?.intensity || 50) * 1.5)}%` }}
+                >
+                  Hail {Math.round(primaryStorm?.intensity ? primaryStorm.intensity * 1.4 : 65)}%
+                </div>
+              </div>
 
-      {/* Control Room Map Legend */}
+              {/* Downburst Wind (Royal Blue) */}
+              <div className="flex h-5 w-full rounded bg-slate-100 overflow-hidden font-mono text-[10px] text-white">
+                <div
+                  className="bg-blue-600 flex items-center justify-center px-1.5 font-bold transition-all duration-500"
+                  style={{ width: `${Math.min(100, (primaryStorm?.speed_kmh || 30) * 1.8)}%` }}
+                >
+                  Wind {Math.round(primaryStorm?.speed_kmh ? primaryStorm.speed_kmh * 1.6 : 55)}%
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Colored Buttons for other active storm cells */}
+          <div className="space-y-1.5">
+            <button
+              onClick={() => storms[1] && onSelectStorm(storms[1])}
+              className="w-full text-left px-3 py-2 rounded-lg bg-[#1E3A8A] hover:bg-[#1e40af] text-white font-semibold text-[11px] flex items-center justify-between shadow-xs transition-colors"
+            >
+              <span className="truncate">Cell #02 - North Squall</span>
+              <ChevronDown className="w-3.5 h-3.5 text-blue-200 shrink-0" />
+            </button>
+
+            <button
+              onClick={() => storms[2] && onSelectStorm(storms[2])}
+              className="w-full text-left px-3 py-2 rounded-lg bg-[#059669] hover:bg-[#047857] text-white font-semibold text-[11px] flex items-center justify-between shadow-xs transition-colors"
+            >
+              <span className="truncate">Cell #03 - Coastal Cluster</span>
+              <ChevronDown className="w-3.5 h-3.5 text-emerald-200 shrink-0" />
+            </button>
+
+            <button
+              onClick={() => storms[3] && onSelectStorm(storms[3])}
+              className="w-full text-left px-3 py-2 rounded-lg bg-[#DC2626] hover:bg-[#b91c1c] text-white font-semibold text-[11px] flex items-center justify-between shadow-xs transition-colors"
+            >
+              <span className="truncate">Cell #04 - Hail Core</span>
+              <ChevronDown className="w-3.5 h-3.5 text-red-200 shrink-0" />
+            </button>
+
+            <button
+              onClick={() => storms[4] && onSelectStorm(storms[4])}
+              className="w-full text-left px-3 py-2 rounded-lg bg-[#2563EB] hover:bg-[#1d4ed8] text-white font-semibold text-[11px] flex items-center justify-between shadow-xs transition-colors"
+            >
+              <span className="truncate">Cell #05 - Developing Cell</span>
+              <ChevronDown className="w-3.5 h-3.5 text-blue-200 shrink-0" />
+            </button>
+          </div>
+        </div>
+      </DraggableWidget>
+
+      {/* 5. GIS METEOROLOGICAL LAYER MANAGERS (Auto-syncs across Basemap styles) */}
+      <React.Fragment key={styleVersion}>
+        <RadarLayer
+          map={map}
+          visible={layers.radarReflectivity}
+          radarPoints={radarPoints}
+          centerLat={primaryStorm?.centroid_lat}
+          centerLon={primaryStorm?.centroid_lon}
+          maxDbz={primaryStorm?.intensity}
+        />
+
+        <SatelliteLayer
+          map={map}
+          visible={layers.satelliteIR}
+          centerLat={primaryStorm?.centroid_lat}
+          centerLon={primaryStorm?.centroid_lon}
+          minBtK={primaryStorm?.indicators?.min_bt_k}
+        />
+
+        <LightningLayer
+          map={map}
+          visible={layers.lightningFlashes}
+          flashes={lightningFlashes}
+        />
+
+        <StormLayer
+          map={map}
+          visible={layers.stormCells}
+          storms={storms}
+          selectedStormId={selectedStorm?.storm_id || null}
+          onSelectStorm={(s) => onSelectStorm(s)}
+        />
+
+        <TrackLayer
+          map={map}
+          visible={layers.stormTracks}
+          storms={storms}
+          selectedHorizon={selectedHorizon}
+        />
+
+        <HazardLayer
+          map={map}
+          visible={layers.hazardZones}
+          storms={storms}
+        />
+
+        <AnomalyLayer
+          map={map}
+          visible={layers.extremeAnomalies}
+        />
+      </React.Fragment>
+
+      {/* Map Legend */}
       <MapLegend />
     </div>
   );

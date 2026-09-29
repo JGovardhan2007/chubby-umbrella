@@ -1,56 +1,57 @@
 import React from 'react';
+import { DraggableWidget } from '../panels/DraggableWidget';
 
 export const MapLegend: React.FC = () => {
   return (
-    <div className="absolute bottom-4 right-4 bg-[#111827]/95 backdrop-blur-sm border border-[#1F293D] rounded-md p-3 text-[11px] font-sans text-slate-300 shadow-xl z-10 w-64 select-none">
-      <div className="font-mono text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-2 border-b border-[#1F293D] pb-1 flex justify-between items-center">
-        <span>MAP INTENSITY LEGEND</span>
-        <span className="text-[9px] text-sky-400 font-normal">SIH 26084</span>
+    <DraggableWidget
+      id="map-legend"
+      title="Radar & Intensity Scale"
+      defaultPosition={{ x: 24, y: 380 }}
+      defaultWidth={260}
+      minWidth={220}
+      maxWidth={420}
+      collapsible={true}
+    >
+      <div className="text-[11px] font-sans text-slate-700 select-none">
+        {/* Radar Reflectivity Scale */}
+        <div className="mb-2.5">
+          <div className="text-[10px] text-slate-500 mb-1 flex justify-between">
+            <span>Reflectivity (dBZ)</span>
+            <span className="font-mono text-[9px] font-semibold text-slate-700">20 → 65+</span>
+          </div>
+          <div className="h-2 rounded-full w-full bg-gradient-to-r from-sky-400 via-green-500 via-yellow-400 via-red-500 to-purple-600 mb-1" />
+          <div className="flex justify-between text-[9px] font-mono text-slate-400 font-medium">
+            <span>20</span>
+            <span>35</span>
+            <span>45</span>
+            <span>55</span>
+            <span>65+</span>
+          </div>
+        </div>
+
+        {/* Grid of Symbol Keys */}
+        <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-[10px] pt-1.5 border-t border-slate-100">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 inline-block shadow-xs" />
+            <span className="text-slate-600 truncate">Lightning Flash</span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-0.5 bg-slate-700 inline-block" />
+            <span className="text-slate-600 truncate">Observed Track</span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full border border-red-500 bg-red-100 inline-block" />
+            <span className="text-slate-600 truncate">Storm Core</span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-0.5 border-b-2 border-dashed border-amber-500 inline-block" />
+            <span className="text-slate-600 truncate">Predicted ETA</span>
+          </div>
+        </div>
       </div>
-
-      {/* Radar Reflectivity Scale */}
-      <div className="mb-2.5">
-        <div className="text-[10px] text-slate-400 mb-1 flex justify-between">
-          <span>Radar Reflectivity (dBZ)</span>
-          <span className="font-mono text-[9px]">20 → 65+</span>
-        </div>
-        <div className="h-2 rounded-sm w-full bg-gradient-to-r from-sky-400 via-green-500 via-yellow-400 via-red-500 to-purple-600 mb-1" />
-        <div className="flex justify-between text-[9px] font-mono text-slate-400">
-          <span>20</span>
-          <span>35</span>
-          <span>45</span>
-          <span>55</span>
-          <span>65+</span>
-        </div>
-      </div>
-
-      {/* Grid of Symbol Keys */}
-      <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-[10px] pt-1.5 border-t border-[#1F293D]/80">
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block shadow-sm" />
-          <span>Lightning Flash</span>
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          <span className="w-3 h-0.5 bg-white inline-block" />
-          <span>Observed Track</span>
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full border border-red-500 bg-red-500/30 inline-block" />
-          <span>Storm Core</span>
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          <span className="w-3 h-0.5 border-b border-dashed border-sky-400 inline-block" />
-          <span>Predicted Track</span>
-        </div>
-
-        <div className="flex items-center gap-1.5 col-span-2">
-          <span className="w-2.5 h-2.5 bg-amber-500/30 border border-amber-500/60 rounded-sm inline-block" />
-          <span>Uncertainty Cone (&plusmn;6 km/hr dispersion)</span>
-        </div>
-      </div>
-    </div>
+    </DraggableWidget>
   );
 };

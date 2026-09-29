@@ -116,33 +116,33 @@ export const StormLayer: React.FC<StormLayerProps> = ({
         type: 'circle',
         source: centroidSourceId,
         paint: {
-          'circle-radius': ['case', ['get', 'isSelected'], 8, 6],
-          'circle-color': '#FFFFFF',
-          'circle-stroke-width': 2.5,
-          'circle-stroke-color': '#0B0F19'
+          'circle-radius': ['case', ['get', 'isSelected'], 9, 7],
+          'circle-color': '#F59E0B',
+          'circle-stroke-width': 3,
+          'circle-stroke-color': '#FFFFFF'
         }
       });
 
-      // Centroid label text
+      // Centroid label text & detail tag
       map.addLayer({
         id: labelLayerId,
         type: 'symbol',
         source: centroidSourceId,
         layout: {
-          'text-field': ['concat', ['get', 'storm_id'], '\n', ['to-string', ['round', ['get', 'intensity']]], ' dBZ'],
+          'text-field': ['concat', ['get', 'storm_id'], ' (', ['to-string', ['round', ['get', 'intensity']]], ' dBZ)'],
           'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
           'text-size': 11,
-          'text-offset': [0, 1.8],
+          'text-offset': [0, 1.6],
           'text-anchor': 'top'
         },
         paint: {
-          'text-color': '#F8FAFC',
-          'text-halo-color': '#0B0F19',
-          'text-halo-width': 1.5
+          'text-color': '#0F172A',
+          'text-halo-color': '#FFFFFF',
+          'text-halo-width': 2.5
         }
       });
 
-      // Click handler on storm centroid or polygon
+      // Click & Hover handlers on storm centroid or polygon
       const handleStormClick = (e: any) => {
         if (e.features && e.features.length > 0) {
           const clickedId = e.features[0].properties.storm_id;
@@ -153,8 +153,21 @@ export const StormLayer: React.FC<StormLayerProps> = ({
         }
       };
 
+      const handleMouseEnter = () => {
+        map.getCanvas().style.cursor = 'pointer';
+      };
+
+      const handleMouseLeave = () => {
+        map.getCanvas().style.cursor = 'default';
+      };
+
       map.on('click', centroidLayerId, handleStormClick);
       map.on('click', polyFillLayerId, handleStormClick);
+
+      map.on('mouseenter', centroidLayerId, handleMouseEnter);
+      map.on('mouseleave', centroidLayerId, handleMouseLeave);
+      map.on('mouseenter', polyFillLayerId, handleMouseEnter);
+      map.on('mouseleave', polyFillLayerId, handleMouseLeave);
     }
 
     // Toggle visibility

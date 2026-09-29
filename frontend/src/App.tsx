@@ -6,6 +6,7 @@ import { StormDetails } from './panels/StormDetails';
 import { HazardSummary } from './panels/HazardSummary';
 import { ModelComparison } from './models/ModelComparison';
 import { MapView } from './map/MapView';
+import { ConvectiveCards } from './panels/ConvectiveCards';
 import { ForecastTimeline } from './forecast/ForecastTimeline';
 import { LayerToggleState, SystemStatusData } from './types/weather';
 import { StormCell } from './types/storm';
@@ -20,6 +21,7 @@ export const App: React.FC = () => {
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(1);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [replaySpeed, setReplaySpeed] = useState<number>(1);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Data state
   const [systemStatus, setSystemStatus] = useState<SystemStatusData | null>(null);
@@ -125,7 +127,7 @@ export const App: React.FC = () => {
     : '14:30 IST';
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-[#0B0F19] text-slate-100 overflow-hidden font-sans">
+    <div className="flex flex-col h-screen w-screen bg-[#F8FAFC] text-slate-800 overflow-hidden font-sans">
       {/* 1. TOP BAR */}
       <TopBar
         systemStatus={systemStatus}
@@ -133,12 +135,14 @@ export const App: React.FC = () => {
         onModeChange={handleModeChange}
         currentTimeLabel={timeLabel}
         isBackendConnected={isBackendConnected}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
       />
 
       {/* 2. MAIN CONTENT AREA (Left Sidebar + Large Map + Right Info Panel) */}
       <div className="flex flex-1 min-h-0 overflow-hidden relative">
-        {/* LEFT SIDEBAR: Layers & Data Sources (260px) */}
-        <aside className="w-64 bg-[#111827] border-r border-[#1F293D] flex flex-col shrink-0 z-10 shadow-lg">
+        {/* LEFT SIDEBAR: Detail Filters, Search & Categories (280px) */}
+        <aside className="w-72 bg-white border-r border-slate-200 flex flex-col shrink-0 z-10 shadow-xs">
           <DataSourcePanel
             systemStatus={systemStatus}
             mode={mode}
@@ -149,27 +153,37 @@ export const App: React.FC = () => {
           />
         </aside>
 
-        {/* CENTER: MAIN GIS MAP */}
-        <main className="flex-1 relative flex flex-col h-full overflow-hidden bg-[#0B0F19]">
-          <MapView
-            layers={layers}
+        {/* CENTER: MAIN GIS MAP + BOTTOM CONVECTIVE CARDS */}
+        <main className="flex-1 relative flex flex-col h-full overflow-hidden bg-[#F1F5F9]">
+          <div className="flex-1 relative overflow-hidden">
+            <MapView
+              layers={layers}
+              onToggleLayer={handleToggleLayer}
+              storms={stepData?.storms || []}
+              selectedStorm={selectedStorm}
+              onSelectStorm={setSelectedStorm}
+              selectedHorizon={selectedHorizon}
+              siteEta={stepData?.siteEta || null}
+              radarPoints={stepData?.radarPoints}
+              lightningFlashes={stepData?.lightningFlashes}
+              onMapClickLocation={(lat, lon) => {
+                if (mode === 'live') {
+                  apiService.getLiveNowcast(lat, lon, 'Custom_Map_Location').then(setStepData);
+                }
+              }}
+            />
+          </div>
+
+          {/* BOTTOM CONVECTIVE CARDS (Exact match to "List University" cards in mockup) */}
+          <ConvectiveCards
             storms={stepData?.storms || []}
             selectedStorm={selectedStorm}
             onSelectStorm={setSelectedStorm}
-            selectedHorizon={selectedHorizon}
-            siteEta={stepData?.siteEta || null}
-            radarPoints={stepData?.radarPoints}
-            lightningFlashes={stepData?.lightningFlashes}
-            onMapClickLocation={(lat, lon) => {
-              if (mode === 'live') {
-                apiService.getLiveNowcast(lat, lon, 'Custom_Map_Location').then(setStepData);
-              }
-            }}
           />
         </main>
 
         {/* RIGHT INFORMATION PANEL (320px) */}
-        <aside className="w-80 bg-[#111827] border-l border-[#1F293D] flex flex-col shrink-0 z-10 shadow-lg">
+        <aside className="w-80 bg-white border-l border-slate-200 flex flex-col shrink-0 z-10 shadow-xs">
           {selectedStorm ? (
             <StormDetails
               storm={selectedStorm}
@@ -186,7 +200,7 @@ export const App: React.FC = () => {
             mode={mode}
           />
 
-          <div className="p-3 border-t border-[#1F293D]">
+          <div className="p-3 border-t border-slate-100 bg-white">
             <ModelComparison />
           </div>
         </aside>
@@ -209,3 +223,4 @@ export const App: React.FC = () => {
 };
 
 export default App;
+
