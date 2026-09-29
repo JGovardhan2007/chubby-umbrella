@@ -12,7 +12,9 @@ import { StormLayer } from './StormLayer';
 import { TrackLayer } from './TrackLayer';
 import { HazardLayer } from './HazardLayer';
 import { AnomalyLayer } from '../anomaly/AnomalyLayer';
+import { RadarStationLayer } from './RadarStationLayer';
 import { MapLegend } from './MapLegend';
+import { LocationOption } from '../panels/TopBar';
 
 import { MapDetailsDrawer } from './MapDetailsDrawer';
 
@@ -29,6 +31,7 @@ interface MapViewProps {
   radarPoints?: { lat: number; lon: number; dbz: number }[];
   lightningFlashes?: { lat: number; lon: number; ka: number; type: string }[];
   onLocateMe?: () => void;
+  onSelectCity?: (loc: LocationOption) => void;
   onMapClickLocation?: (lat: number, lon: number) => void;
 }
 
@@ -43,6 +46,7 @@ export const MapView: React.FC<MapViewProps> = ({
   radarPoints,
   lightningFlashes,
   onLocateMe,
+  onSelectCity,
   onMapClickLocation
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -479,6 +483,12 @@ export const MapView: React.FC<MapViewProps> = ({
         <AnomalyLayer
           map={map}
           visible={layers.extremeAnomalies}
+        />
+
+        {/* Nationwide Doppler Weather Radar Network & Stations */}
+        <RadarStationLayer
+          map={map}
+          onSelectStation={onSelectCity}
         />
       </React.Fragment>
 

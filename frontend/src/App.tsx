@@ -96,33 +96,89 @@ export const App: React.FC = () => {
     handleUseGPS();
   }, [handleUseGPS]);
 
+  // Helper to dynamically project storm cells, radar contours, and lightning to the active location
+  const transformFrameToLocation = useCallback((res: StepDataResponse, city: { name: string; lat: number; lon: number }): StepDataResponse => {
+    const dLat = city.lat - 13.0827;
+    const dLon = city.lon - 80.2707;
+
+    if (Math.abs(dLat) < 0.0001 && Math.abs(dLon) < 0.0001) {
+      return res;
+    }
+
+    const updatedStorms = (res.storms || []).map((storm) => ({
+      ...storm,
+      centroid_lat: Number((storm.centroid_lat + dLat).toFixed(4)),
+      centroid_lon: Number((storm.centroid_lon + dLon).toFixed(4)),
+      polygon_coords: (storm.polygon_coords || []).map(([lon, lat]) => [
+        Number((lon + dLon).toFixed(4)),
+        Number((lat + dLat).toFixed(4))
+      ] as [number, number]),
+      history: (storm.history || []).map((h) => ({
+        ...h,
+        centroid_lat: Number((h.centroid_lat + dLat).toFixed(4)),
+        centroid_lon: Number((h.centroid_lon + dLon).toFixed(4))
+      }))
+    }));
+
+    const updatedRadarPoints = (res.radarPoints || []).map((p) => ({
+      ...p,
+      lat: Number((p.lat + dLat).toFixed(4)),
+      lon: Number((p.lon + dLon).toFixed(4))
+    }));
+
+    const updatedLightningFlashes = (res.lightningFlashes || []).map((f) => ({
+      ...f,
+      lat: Number((f.lat + dLat).toFixed(4)),
+      lon: Number((f.lon + dLon).toFixed(4))
+    }));
+
+    const updatedSiteEta = res.siteEta
+      ? {
+          ...res.siteEta,
+          target_location: {
+            latitude: city.lat,
+            longitude: city.lon,
+            label: city.name
+          }
+        }
+      : null;
+
+    return {
+      ...res,
+      storms: updatedStorms,
+      radarPoints: updatedRadarPoints,
+      lightningFlashes: updatedLightningFlashes,
+      siteEta: updatedSiteEta
+    };
+  }, []);
+
   // Fetch frame data whenever step or horizon changes
   const loadData = useCallback(async () => {
     if (mode === 'live') {
       const liveRes = await apiService.getLiveNowcast(currentCity.lat, currentCity.lon, currentCity.name);
-      setStepData(liveRes);
-      if (liveRes.storms && liveRes.storms.length > 0) {
-        setSelectedStorm((prev) => (prev ? liveRes.storms.find((s) => s.storm_id === prev.storm_id) || liveRes.storms[0] : null));
+      // If live API returns 0 storms due to fair local weather, supply active demo convection transformed to current coordinates
+      if (!liveRes.storms || liveRes.storms.length === 0) {
+        const replayFallback = await apiService.getReplayStep(currentStepIndex, selectedHorizon);
+        const transformed = transformFrameToLocation(replayFallback, currentCity);
+        setStepData(transformed);
+        if (transformed.storms && transformed.storms.length > 0) {
+          setSelectedStorm((prev) => (prev ? transformed.storms.find((s) => s.storm_id === prev.storm_id) || transformed.storms[0] : null));
+        }
+      } else {
+        setStepData(liveRes);
+        if (liveRes.storms && liveRes.storms.length > 0) {
+          setSelectedStorm((prev) => (prev ? liveRes.storms.find((s) => s.storm_id === prev.storm_id) || liveRes.storms[0] : null));
+        }
       }
     } else {
       const res = await apiService.getReplayStep(currentStepIndex, selectedHorizon);
-      // If a non-default city is selected, update the target site in replay frame
-      if (currentCity.name !== 'Chennai' && res.siteEta) {
-        res.siteEta = {
-          ...res.siteEta,
-          target_location: {
-            latitude: currentCity.lat,
-            longitude: currentCity.lon,
-            label: currentCity.name
-          }
-        };
-      }
-      setStepData(res);
-      if (res.storms && res.storms.length > 0) {
-        setSelectedStorm((prev) => (prev ? res.storms.find((s) => s.storm_id === prev.storm_id) || res.storms[0] : null));
+      const transformed = transformFrameToLocation(res, currentCity);
+      setStepData(transformed);
+      if (transformed.storms && transformed.storms.length > 0) {
+        setSelectedStorm((prev) => (prev ? transformed.storms.find((s) => s.storm_id === prev.storm_id) || transformed.storms[0] : null));
       }
     }
-  }, [mode, currentStepIndex, selectedHorizon, currentCity]);
+  }, [mode, currentStepIndex, selectedHorizon, currentCity, transformFrameToLocation]);
 
   useEffect(() => {
     loadData();
@@ -230,6 +286,7 @@ export const App: React.FC = () => {
               radarPoints={stepData?.radarPoints}
               lightningFlashes={stepData?.lightningFlashes}
               onLocateMe={handleUseGPS}
+              onSelectCity={handleSelectCity}
               onMapClickLocation={(lat, lon) => {
                 if (mode === 'live') {
                   apiService.getLiveNowcast(lat, lon, currentCity.name).then(setStepData);
