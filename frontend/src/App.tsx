@@ -17,6 +17,7 @@ import { GovHeader } from './home/GovHeader';
 import { PortalNavBar, PortalTab } from './home/PortalNavBar';
 import { HomePage } from './home/HomePage';
 import { MapsPage } from './maps-dashboard/MapsPage';
+import { AnalysisPage } from './analysis/AnalysisPage';
 
 export const App: React.FC = () => {
   // Navigation state: 'home' | 'nowcast' | 'maps' | 'analysis' | 'database'
@@ -271,25 +272,7 @@ export const App: React.FC = () => {
 
       {activeTab === 'maps' && <MapsPage />}
 
-      {activeTab === 'analysis' && (
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#F4EFEA]">
-          <div className="max-w-md bg-white p-8 rounded-2xl border border-slate-200 shadow-md">
-            <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto mb-4">
-              📊
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-2">Meteorological Analysis Portal</h3>
-            <p className="text-xs text-slate-600 mb-4 leading-relaxed">
-              NCMRWF-style precipitation time-series, CAPE/CIN stability soundings, and hail probability distribution charts are being prepared.
-            </p>
-            <button
-              onClick={() => setActiveTab('maps')}
-              className="px-4 py-2 bg-amber-500 hover:bg-orange-600 text-slate-950 font-bold text-xs rounded-xl shadow-xs transition-colors"
-            >
-              Explore Forecast Maps Instead →
-            </button>
-          </div>
-        </div>
-      )}
+      {activeTab === 'analysis' && <AnalysisPage />}
 
       {activeTab === 'database' && (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#F4EFEA]">
