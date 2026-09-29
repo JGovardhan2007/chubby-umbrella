@@ -202,104 +202,177 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
     };
     window.addEventListener('resize', handleResize);
 
-    // Dynamic wind streamlines across Arabian Sea, Bay of Bengal, and Indian Mainland
-    const NUM_PARTICLES = 320;
+    // High-Density Global Wind Streamline Particle Engine
+    const NUM_PARTICLES = 1100;
     interface StreamParticle {
       lon: number;
       lat: number;
       speed: number;
-      length: number;
-      life: number;
-      maxLife: number;
+      age: number;
+      maxAge: number;
+      trail: [number, number][]; // Pixel coordinates history for smooth curved ribbons
     }
+
+    // Mathematical global atmospheric vector field: computes u (zonal) and v (meridional) wind vectors
+    const getWindVector = (lon: number, lat: number) => {
+      let u = 0.6;
+      let v = 0.2;
+
+      // 1. South-Westerly Monsoon & Somali Cross-Equatorial Low Level Jet (Arabian Sea)
+      if (lat >= -5 && lat <= 22 && lon >= 38 && lon <= 78) {
+        const jetFactor = Math.sin(((lat + 5) / 27) * Math.PI);
+        u = 1.6 * jetFactor + 0.4;
+        v = 0.9 * jetFactor + 0.2;
+      }
+      // 2. Bay of Bengal Cyclonic Depression & Monsoon Trough
+      else if (lat >= 10 && lat <= 26 && lon >= 80 && lon <= 98) {
+        const cLon = 89.0;
+        const cLat = 19.5;
+        const dx = (lon - cLon) * 0.15;
+        const dy = (lat - cLat) * 0.15;
+        const dist = Math.sqrt(dx * dx + dy * dy) + 0.1;
+        u = -dy * (1.2 / dist) + 0.5;
+        v = dx * (1.2 / dist) + 0.35;
+      }
+      // 3. Subtropical Westerly Jet Stream across Himalayas, Tibet & Central Asia
+      else if (lat >= 27 && lat <= 48) {
+        const wave = Math.sin((lon / 180) * Math.PI * 4);
+        u = 1.9 + wave * 0.4;
+        v = -0.3 + wave * 0.3;
+      }
+      // 4. Arabian Peninsula & Persian Gulf Anticyclonic Circulation
+      else if (lat >= 15 && lat <= 35 && lon >= 35 && lon <= 60) {
+        const cLon = 48.0;
+        const cLat = 24.0;
+        const dx = (lon - cLon) * 0.1;
+        const dy = (lat - cLat) * 0.1;
+        u = dy * 0.6 + 0.3;
+        v = -dx * 0.6 - 0.2;
+      }
+      // 5. Southern Indian Ocean South-East Trade Winds
+      else if (lat < 0) {
+        u = -1.2;
+        v = 0.5;
+      }
+      // 6. Southeast Asia / Indochina northward monsoon surge
+      else if (lon > 98 && lat > 5 && lat < 28) {
+        u = 0.5;
+        v = 1.1;
+      }
+      else {
+        u = 0.7 + Math.sin((lon + lat) * 0.1) * 0.3;
+        v = 0.2 + Math.cos((lon - lat) * 0.1) * 0.2;
+      }
+
+      return { u, v };
+    };
+
+    const spawnParticle = (): StreamParticle => {
+      const map = mapRef.current;
+      let minLon = 30;
+      let maxLon = 120;
+      let minLat = -10;
+      let maxLat = 55;
+
+      if (map) {
+        try {
+          const bounds = map.getBounds();
+          minLon = bounds.getWest() - 5;
+          maxLon = bounds.getEast() + 5;
+          minLat = bounds.getSouth() - 4;
+          maxLat = bounds.getNorth() + 4;
+        } catch {}
+      }
+
+      return {
+        lon: minLon + Math.random() * (maxLon - minLon),
+        lat: minLat + Math.random() * (maxLat - minLat),
+        speed: 0.10 + Math.random() * 0.16,
+        age: 0,
+        maxAge: 70 + Math.random() * 80,
+        trail: []
+      };
+    };
 
     const particles: StreamParticle[] = [];
     for (let i = 0; i < NUM_PARTICLES; i++) {
-      particles.push({
-        lon: 55 + Math.random() * 45, // 55°E to 100°E
-        lat: 2 + Math.random() * 34,  // 2°N to 36°N
-        speed: 0.08 + Math.random() * 0.14,
-        length: 12 + Math.random() * 18,
-        life: Math.random() * 120,
-        maxLife: 100 + Math.random() * 80
-      });
+      const p = spawnParticle();
+      p.age = Math.random() * p.maxAge; // Stagger initial ages
+      particles.push(p);
     }
 
     const render = () => {
-      // Fade previous frame trails
       ctx.clearRect(0, 0, width, height);
 
       if (activeTab === 'wind' || activeTab === 'cyclone') {
         const map = mapRef.current;
 
-        for (const p of particles) {
-          // Monsoon Wind Field Equations (Southwesterly Arabian Sea flow + Bay of Bengal curl + Gangetic trough)
-          let u = 0.8; // West-to-East base flow
-          let v = 0.3; // South-to-North base flow
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          const { u, v } = getWindVector(p.lon, p.lat);
 
-          if (p.lat < 15 && p.lon < 75) {
-            // Strong South-Westerly Arabian Sea jet
-            u = 1.2;
-            v = 0.6;
-          } else if (p.lon > 80 && p.lat > 12 && p.lat < 24) {
-            // Cyclonic curvature over Bay of Bengal
-            const centerLon = 88.0;
-            const centerLat = 18.0;
-            const dLon = p.lon - centerLon;
-            const dLat = p.lat - centerLat;
-            u = -dLat * 0.08 + 0.3;
-            v = dLon * 0.08 + 0.4;
-          } else if (p.lat > 24 && p.lat < 32 && p.lon > 74 && p.lon < 88) {
-            // Indo-Gangetic easterly/westerly wind trough
-            u = 0.6;
-            v = -0.25;
-          } else if (p.lat > 30) {
-            // Westerly subtropical jet along Himalayas
-            u = 1.4;
-            v = -0.1;
-          }
-
-          // Advance geographical position
+          // Advance geographic coordinates
           p.lon += u * p.speed;
           p.lat += v * p.speed;
-          p.life += 1;
+          p.age += 1;
 
-          if (p.life >= p.maxLife || p.lon > 102 || p.lat > 37 || p.lat < 0 || p.lon < 53) {
-            p.lon = 55 + Math.random() * 40;
-            p.lat = 2 + Math.random() * 32;
-            p.life = 0;
-          }
-
-          // Convert Lat/Lon to Canvas Pixel Coordinates via MapLibre
-          let screenX = (p.lon - 55) * (width / 45);
-          let screenY = (36 - p.lat) * (height / 36);
+          // Convert geographic coordinates to canvas pixel position
+          let px = 0;
+          let py = 0;
 
           if (map) {
             try {
               const pos = map.project([p.lon, p.lat]);
-              screenX = pos.x;
-              screenY = pos.y;
-            } catch {}
+              px = pos.x;
+              py = pos.y;
+            } catch {
+              px = (p.lon - 30) * (width / 90);
+              py = (55 - p.lat) * (height / 65);
+            }
+          } else {
+            px = (p.lon - 30) * (width / 90);
+            py = (55 - p.lat) * (height / 65);
           }
 
-          const alpha = Math.sin((p.life / p.maxLife) * Math.PI);
-          const angle = Math.atan2(v, u);
+          // Maintain smooth trail history (max 8-10 points for curved aerodynamic ribbon)
+          p.trail.push([px, py]);
+          if (p.trail.length > 10) {
+            p.trail.shift();
+          }
 
-          ctx.beginPath();
-          ctx.moveTo(screenX, screenY);
-          ctx.lineTo(
-            screenX - Math.cos(angle) * p.length,
-            screenY + Math.sin(angle) * p.length // Invert Y in screen space
-          );
+          // Check if particle exceeded lifespan or went far offscreen
+          if (
+            p.age >= p.maxAge ||
+            px < -80 ||
+            px > width + 80 ||
+            py < -80 ||
+            py > height + 80
+          ) {
+            particles[i] = spawnParticle();
+            continue;
+          }
 
-          // Glowing bright neon green wind streamlines as shown in official NCMRWF guidance
-          ctx.strokeStyle =
-            activeTab === 'cyclone'
-              ? `rgba(249, 115, 22, ${alpha * 0.85})`
-              : `rgba(34, 197, 94, ${alpha * 0.9})`;
-          ctx.lineWidth = 1.8;
-          ctx.lineCap = 'round';
-          ctx.stroke();
+          // Draw smoothly curved streamline ribbon
+          if (p.trail.length >= 2) {
+            const lifeProgress = p.age / p.maxAge;
+            const alpha = Math.sin(lifeProgress * Math.PI);
+
+            ctx.beginPath();
+            ctx.moveTo(p.trail[0][0], p.trail[0][1]);
+            for (let j = 1; j < p.trail.length; j++) {
+              ctx.lineTo(p.trail[j][0], p.trail[j][1]);
+            }
+
+            // Authentic bright lime/emerald glowing streamline stroke
+            ctx.strokeStyle =
+              activeTab === 'cyclone'
+                ? `rgba(251, 146, 60, ${alpha * 0.85})`
+                : `rgba(74, 222, 128, ${alpha * 0.92})`;
+            ctx.lineWidth = 1.35;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+          }
         }
       }
 
