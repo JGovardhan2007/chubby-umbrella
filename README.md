@@ -159,26 +159,52 @@ Status classifications:
 
 ### Step 1: Install Dependencies
 ```bash
+# Python Backend Dependencies
 pip install -r requirements.txt
+
+# Frontend UI Dependencies
+cd frontend
+npm install
+cd ..
 ```
 
-### Step 2: Run Unit Tests
+### Step 2: Launch Backend API Server
 ```bash
-pytest
+python -m uvicorn server:app --host 127.0.0.1 --port 8000
 ```
-*All 17 automated tests validate ingestion, QC, fusion, detection, tracking, hazards, nowcasting, replay, and evaluation.*
 
-### Step 3: Generate Realistic Sample Dataset
+### Step 3: Launch Reusable GIS Dashboard (Frontend)
+```bash
+cd frontend
+npm run dev
+```
+Open **`http://localhost:5173`** in your browser to view the meteorological control room dashboard.
+
+---
+
+## 💻 CLI Commands (Headless / Testing)
+
+### 1. Run Automated Unit Test Suite
+```bash
+pytest -v
+```
+
+### 2. Generate Realistic Sample Dataset
 ```bash
 python run_nowcast.py generate-sample -o data/sample -n 6 -t 10
 ```
 
-### Step 4: Run Historical Replay Pipeline
+### 3. Run Historical Replay Pipeline (CLI)
 ```bash
 python run_nowcast.py replay -s data/sample/replay_sequence_manifest.json -g data/processed/geojson --lat 13.0827 --lon 80.2707 --site-name Chennai_City
 ```
 
-### Step 5: Run Verification & Model Evaluation
+### 4. Run Live Operational Nowcast via Open APIs
+```bash
+python run_nowcast.py live --lat 13.0827 --lon 80.2707 --site-name Chennai_Live
+```
+
+### 5. Run Verification & Model Evaluation
 ```bash
 python run_nowcast.py evaluate -s data/sample/replay_sequence_manifest.json -r data/processed/evaluation_report.json
 ```
