@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
-import { Sun, Zap, RotateCcw, Plus, Minus, Layers, CloudRain, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { Sun, Zap, RotateCcw, Plus, Minus, Layers, CloudRain, ChevronDown, ChevronUp, ExternalLink, Crosshair } from 'lucide-react';
 import { LayerToggleState } from '../types/weather';
 import { StormCell } from '../types/storm';
 import { HorizonMinutes, SiteEtaSummary } from '../types/forecast';
@@ -28,6 +28,7 @@ interface MapViewProps {
   siteEta: SiteEtaSummary | null;
   radarPoints?: { lat: number; lon: number; dbz: number }[];
   lightningFlashes?: { lat: number; lon: number; ka: number; type: string }[];
+  onLocateMe?: () => void;
   onMapClickLocation?: (lat: number, lon: number) => void;
 }
 
@@ -41,6 +42,7 @@ export const MapView: React.FC<MapViewProps> = ({
   siteEta,
   radarPoints,
   lightningFlashes,
+  onLocateMe,
   onMapClickLocation
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -121,7 +123,11 @@ export const MapView: React.FC<MapViewProps> = ({
   const handleZoomIn = () => map?.zoomIn();
   const handleZoomOut = () => map?.zoomOut();
   const handleReset = () => {
-    map?.flyTo({ center: [80.12, 13.08], zoom: 9.0 });
+    if (siteEta?.target_location) {
+      map?.flyTo({ center: [siteEta.target_location.longitude, siteEta.target_location.latitude], zoom: 9.0, essential: true });
+    } else {
+      map?.flyTo({ center: [80.12, 13.08], zoom: 9.0 });
+    }
   };
 
   const [selectedBasemap, setSelectedBasemap] = useState<'positron' | 'satellite' | 'voyager' | 'dark'>('positron');
@@ -303,6 +309,19 @@ export const MapView: React.FC<MapViewProps> = ({
 
         {/* Navigation Control Bar */}
         <div className="bg-white/95 backdrop-blur-sm border border-slate-200 rounded-xl shadow-md flex flex-col overflow-hidden">
+          <button
+            onClick={() => {
+              if (onLocateMe) {
+                onLocateMe();
+              } else if (siteEta?.target_location) {
+                map?.flyTo({ center: [siteEta.target_location.longitude, siteEta.target_location.latitude], zoom: 9.5, essential: true });
+              }
+            }}
+            title="My Location (Live GPS)"
+            className="p-2.5 text-slate-600 hover:bg-amber-50 hover:text-amber-600 border-b border-slate-100 flex items-center justify-center transition-colors"
+          >
+            <Crosshair className="w-4 h-4 text-amber-600" />
+          </button>
           <button
             onClick={() => setIsLayerMenuOpen(!isLayerMenuOpen)}
             title="Map details & layers"

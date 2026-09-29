@@ -69,6 +69,33 @@ export const App: React.FC = () => {
     lon: 80.2707
   });
 
+  const handleUseGPS = useCallback(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = Number(pos.coords.latitude.toFixed(4));
+          const lon = Number(pos.coords.longitude.toFixed(4));
+          setCurrentCity({
+            name: 'My Current Location',
+            lat,
+            lon
+          });
+          setMode('live');
+          apiService.setMode('api');
+        },
+        (err) => {
+          console.warn('Geolocation query failed or denied:', err);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
+  }, []);
+
+  // Auto-detect system GPS coordinates on initial app load
+  useEffect(() => {
+    handleUseGPS();
+  }, [handleUseGPS]);
+
   // Fetch frame data whenever step or horizon changes
   const loadData = useCallback(async () => {
     if (mode === 'live') {
@@ -171,6 +198,7 @@ export const App: React.FC = () => {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onSelectCity={handleSelectCity}
+        onUseGPS={handleUseGPS}
         currentLocationName={currentCity.name}
       />
 
@@ -201,6 +229,7 @@ export const App: React.FC = () => {
               siteEta={stepData?.siteEta || null}
               radarPoints={stepData?.radarPoints}
               lightningFlashes={stepData?.lightningFlashes}
+              onLocateMe={handleUseGPS}
               onMapClickLocation={(lat, lon) => {
                 if (mode === 'live') {
                   apiService.getLiveNowcast(lat, lon, currentCity.name).then(setStepData);
