@@ -16,6 +16,8 @@ import { MapLegend } from './MapLegend';
 
 import { MapDetailsDrawer } from './MapDetailsDrawer';
 
+import { formatStormName } from '../utils/formatters';
+
 interface MapViewProps {
   layers: LayerToggleState;
   onToggleLayer?: (key: keyof LayerToggleState) => void;
@@ -297,7 +299,7 @@ export const MapView: React.FC<MapViewProps> = ({
           {/* Active Expanded Card */}
           <div className="rounded-lg border-2 border-amber-400/90 bg-white p-2.5 shadow-xs">
             <div className="flex items-center justify-between font-bold text-slate-900 mb-2">
-              <span className="truncate">{primaryStorm?.storm_id || 'Cell #01 - Supercell'}</span>
+              <span className="truncate">{primaryStorm ? formatStormName(primaryStorm.storm_id) : 'Cell #01 - Supercell'}</span>
               <ChevronUp className="w-3.5 h-3.5 text-slate-400 shrink-0" />
             </div>
 

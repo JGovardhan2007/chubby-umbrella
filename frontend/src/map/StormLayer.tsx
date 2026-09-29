@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import maplibregl from 'maplibre-gl';
 import { StormCell } from '../types/storm';
+import { formatStormName } from '../utils/formatters';
 
 interface StormLayerProps {
   map: maplibregl.Map | null;
@@ -31,7 +32,7 @@ export const StormLayer: React.FC<StormLayerProps> = ({
     // 1. Build Polygons GeoJSON
     const polyFeatures = storms
       .filter((s) => s.polygon_coords && s.polygon_coords.length >= 3)
-      .map((s) => ({
+      .map((s, idx) => ({
         type: 'Feature' as const,
         id: s.storm_id,
         geometry: {
@@ -40,6 +41,7 @@ export const StormLayer: React.FC<StormLayerProps> = ({
         },
         properties: {
           storm_id: s.storm_id,
+          display_name: formatStormName(s.storm_id, idx),
           intensity: s.intensity,
           isSelected: s.storm_id === selectedStormId,
           color: s.intensity >= 52 ? '#EF4444' : s.intensity >= 45 ? '#EAB308' : '#38BDF8'
@@ -47,7 +49,7 @@ export const StormLayer: React.FC<StormLayerProps> = ({
       }));
 
     // 2. Build Centroids GeoJSON
-    const centroidFeatures = storms.map((s) => ({
+    const centroidFeatures = storms.map((s, idx) => ({
       type: 'Feature' as const,
       id: s.storm_id,
       geometry: {
@@ -56,6 +58,7 @@ export const StormLayer: React.FC<StormLayerProps> = ({
       },
       properties: {
         storm_id: s.storm_id,
+        display_name: formatStormName(s.storm_id, idx),
         intensity: s.intensity,
         stage: s.convective_stage,
         speed: s.speed_kmh,
@@ -129,7 +132,7 @@ export const StormLayer: React.FC<StormLayerProps> = ({
         type: 'symbol',
         source: centroidSourceId,
         layout: {
-          'text-field': ['concat', ['get', 'storm_id'], ' (', ['to-string', ['round', ['get', 'intensity']]], ' dBZ)'],
+          'text-field': ['concat', ['get', 'display_name'], ' (', ['to-string', ['round', ['get', 'intensity']]], ' dBZ)'],
           'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
           'text-size': 11,
           'text-offset': [0, 1.6],

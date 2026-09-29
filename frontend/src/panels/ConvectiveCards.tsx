@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { StormCell } from '../types/storm';
 
+import { formatStormName, formatStormType } from '../utils/formatters';
+
 interface ConvectiveCardsProps {
   storms: StormCell[];
   selectedStorm: StormCell | null;
@@ -230,7 +232,10 @@ export const ConvectiveCards: React.FC<ConvectiveCardsProps> = ({
                       </div>
                       <div>
                         <h4 className="text-xs font-bold text-slate-900 leading-tight">
-                          {storm.storm_id}
+                          {formatStormName(storm.storm_id, idx)}
+                          <span className="text-[11px] font-normal text-slate-500 ml-1.5">
+                            ({formatStormType(storm.intensity, storm.convective_stage)})
+                          </span>
                         </h4>
                         <span className="text-[10px] text-slate-400 block mt-0.5">
                           📍 {location}

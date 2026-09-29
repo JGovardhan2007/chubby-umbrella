@@ -3,6 +3,8 @@ import { ShieldAlert, Zap, CloudHail, Wind, CloudRain, Clock, AlertTriangle } fr
 import { HazardSummaryData } from '../types/hazard';
 import { SiteEtaSummary } from '../types/forecast';
 
+import { formatStormName } from '../utils/formatters';
+
 interface HazardSummaryProps {
   hazardSummary: HazardSummaryData;
   activeStormCount: number;
@@ -102,7 +104,7 @@ export const HazardSummary: React.FC<HazardSummaryProps> = ({
           <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80 text-[11px] space-y-1.5">
             <div className="flex justify-between">
               <span className="text-slate-500">Nearest Storm:</span>
-              <span className="font-mono font-semibold text-slate-800">{siteEta.nearest_storm_id || 'None'}</span>
+              <span className="font-sans font-semibold text-slate-800">{siteEta.nearest_storm_id ? formatStormName(siteEta.nearest_storm_id) : 'None'}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">Distance:</span>

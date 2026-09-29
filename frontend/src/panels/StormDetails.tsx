@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Navigation, Zap, ShieldAlert, CheckCircle2, Compass, AlertTriangle } from 'lucide-react';
 import { StormCell } from '../types/storm';
 import { SiteEtaSummary } from '../types/forecast';
+import { formatStormName } from '../utils/formatters';
 
 interface StormDetailsProps {
   storm: StormCell;
@@ -23,8 +24,8 @@ export const StormDetails: React.FC<StormDetailsProps> = ({
       <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-          <span className="font-mono text-sm font-bold text-slate-900">{storm.storm_id}</span>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold ml-1">
+          <span className="text-sm font-bold text-slate-900 font-sans">{formatStormName(storm.storm_id)}</span>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold ml-1">
             {storm.convective_stage}
           </span>
         </div>
