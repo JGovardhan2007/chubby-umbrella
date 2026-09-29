@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 
 interface RadarLayerProps {
@@ -18,8 +18,77 @@ export const RadarLayer: React.FC<RadarLayerProps> = ({
   centerLon = 79.7,
   maxDbz = 52.0
 }) => {
-  const animFrameRef = useRef<number | null>(null);
+  const [liveRadarPath, setLiveRadarPath] = useState<string | null>(null);
 
+  // 1. Fetch latest real-time Live Doppler Weather Radar raster tile path from RainViewer
+  useEffect(() => {
+    let isMounted = true;
+    const fetchLiveRadar = async () => {
+      try {
+        const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
+        if (res.ok) {
+          const data = await res.json();
+          const pastFrames = data.radar?.past;
+          if (pastFrames && pastFrames.length > 0 && isMounted) {
+            const latest = pastFrames[pastFrames.length - 1];
+            setLiveRadarPath(latest.path);
+          }
+        }
+      } catch (err) {
+        console.warn('Could not fetch RainViewer live radar metadata:', err);
+      }
+    };
+
+    fetchLiveRadar();
+    const interval = setInterval(fetchLiveRadar, 5 * 60 * 1000); // Refresh every 5 minutes
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  // 2. Manage Real Live Doppler Radar Raster Tile Layer on Map
+  useEffect(() => {
+    if (!map) return;
+
+    const liveRasterSourceId = 'live-rainviewer-radar-source';
+    const liveRasterLayerId = 'live-rainviewer-radar-layer';
+
+    if (liveRadarPath) {
+      const tileUrl = `https://tilecache.rainviewer.com${liveRadarPath}/256/{z}/{x}/{y}/4/1_1.png`;
+
+      if (map.getSource(liveRasterSourceId)) {
+        // If source exists, update tile url by re-adding if path changed
+        const existingLayer = map.getLayer(liveRasterLayerId);
+        if (existingLayer) {
+          map.setLayoutProperty(liveRasterLayerId, 'visibility', visible ? 'visible' : 'none');
+        }
+      } else {
+        map.addSource(liveRasterSourceId, {
+          type: 'raster',
+          tiles: [tileUrl],
+          tileSize: 256,
+          attribution: 'RainViewer Live Doppler Radar'
+        });
+
+        map.addLayer({
+          id: liveRasterLayerId,
+          type: 'raster',
+          source: liveRasterSourceId,
+          paint: {
+            'raster-opacity': 0.85,
+            'raster-fade-duration': 300
+          }
+        });
+      }
+    }
+
+    if (map.getLayer(liveRasterLayerId)) {
+      map.setLayoutProperty(liveRasterLayerId, 'visibility', visible ? 'visible' : 'none');
+    }
+  }, [map, visible, liveRadarPath]);
+
+  // 3. Manage High-Resolution Local Convective Cell Contours
   useEffect(() => {
     if (!map) return;
 
