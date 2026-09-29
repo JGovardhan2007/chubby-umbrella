@@ -18,6 +18,7 @@ import { PortalNavBar, PortalTab } from './home/PortalNavBar';
 import { HomePage } from './home/HomePage';
 import { MapsPage } from './maps-dashboard/MapsPage';
 import { AnalysisPage } from './analysis/AnalysisPage';
+import { DatabasePage } from './database/DatabasePage';
 
 export const App: React.FC = () => {
   // Navigation state: 'home' | 'nowcast' | 'maps' | 'analysis' | 'database'
@@ -274,25 +275,7 @@ export const App: React.FC = () => {
 
       {activeTab === 'analysis' && <AnalysisPage />}
 
-      {activeTab === 'database' && (
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#F4EFEA]">
-          <div className="max-w-md bg-white p-8 rounded-2xl border border-slate-200 shadow-md">
-            <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center mx-auto mb-4">
-              🗄️
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-2">10-Day Historical Weather Archive</h3>
-            <p className="text-xs text-slate-600 mb-4 leading-relaxed">
-              Rolling 10-day historical snapshot database with 24-hour diurnal slideshow & video loop playback is scheduled next.
-            </p>
-            <button
-              onClick={() => setActiveTab('maps')}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
-            >
-              Explore Forecast Maps Instead →
-            </button>
-          </div>
-        </div>
-      )}
+      {activeTab === 'database' && <DatabasePage />}
 
       {activeTab === 'nowcast' && (
         <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
