@@ -94,10 +94,13 @@ export const MapView: React.FC<MapViewProps> = ({
       const cleanLabel = formatLocationName(label);
       const markerHtml = `
         <div class="relative flex items-center justify-center cursor-pointer group">
-          <div class="w-5 h-5 rounded-full bg-amber-500 border-2 border-white shadow-md flex items-center justify-center text-white">
-            <span class="w-2 h-2 rounded-full bg-white"></span>
+          <div class="absolute w-8 h-8 rounded-full bg-blue-500/25 animate-ping"></div>
+          <div class="absolute w-6 h-6 rounded-full bg-blue-500/20"></div>
+          <div class="relative w-4.5 h-4.5 rounded-full bg-[#1A73E8] border-[2.5px] border-white shadow-lg flex items-center justify-center">
+            <span class="w-1 h-1 rounded-full bg-white"></span>
           </div>
-          <div class="absolute -bottom-6 bg-slate-900 text-white text-[10px] font-sans font-semibold px-2.5 py-0.5 rounded shadow-md whitespace-nowrap border border-slate-700">
+          <div class="absolute -bottom-6 bg-slate-900/90 backdrop-blur-xs text-white text-[10px] font-sans font-semibold px-2 py-0.5 rounded-full shadow-md whitespace-nowrap border border-slate-700/80 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
             ${cleanLabel}
           </div>
         </div>

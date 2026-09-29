@@ -48,7 +48,7 @@ export const RadarStationLayer: React.FC<RadarStationLayerProps> = ({
         data: geojsonData
       });
 
-      // 1. Radar coverage pulse rings (150-250km radar footprint)
+      // 1. Radar coverage rings (subtle neutral slate footprint)
       map.addLayer({
         id: ringLayerId,
         type: 'circle',
@@ -63,15 +63,15 @@ export const RadarStationLayer: React.FC<RadarStationLayerProps> = ({
             6, 38,
             8, 75
           ],
-          'circle-color': '#0284C7',
-          'circle-opacity': 0.08,
-          'circle-stroke-width': 1.2,
-          'circle-stroke-color': '#38BDF8',
-          'circle-stroke-opacity': 0.4
+          'circle-color': '#334155',
+          'circle-opacity': 0.04,
+          'circle-stroke-width': 1.0,
+          'circle-stroke-color': '#64748B',
+          'circle-stroke-opacity': 0.25
         }
       });
 
-      // 2. Radar station beacons
+      // 2. Doppler radar station observatory beacons (charcoal slate with white border)
       map.addLayer({
         id: pointLayerId,
         type: 'circle',
@@ -81,31 +81,31 @@ export const RadarStationLayer: React.FC<RadarStationLayerProps> = ({
             'interpolate',
             ['linear'],
             ['zoom'],
-            4, 4,
-            7, 6,
-            10, 8
+            4, 3.5,
+            7, 5,
+            10, 6.5
           ],
-          'circle-color': '#0284C7',
-          'circle-stroke-width': 2,
+          'circle-color': '#0F172A',
+          'circle-stroke-width': 1.8,
           'circle-stroke-color': '#FFFFFF'
         }
       });
 
-      // 3. Station name labels
+      // 3. Station name labels with radar tower prefix
       map.addLayer({
         id: labelLayerId,
         type: 'symbol',
         source: sourceId,
         layout: {
-          'text-field': ['get', 'name'],
+          'text-field': ['concat', '📡 ', ['get', 'name']],
           'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-          'text-size': 11,
+          'text-size': 10.5,
           'text-offset': [0, 1.2],
           'text-anchor': 'top',
           'text-allow-overlap': false
         },
         paint: {
-          'text-color': '#0F172A',
+          'text-color': '#334155',
           'text-halo-color': '#FFFFFF',
           'text-halo-width': 2.0
         }
