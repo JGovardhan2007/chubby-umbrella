@@ -129,6 +129,55 @@ export const MapView: React.FC<MapViewProps> = ({
 
   const handleZoomIn = () => map?.zoomIn();
   const handleZoomOut = () => map?.zoomOut();
+
+  const handleLocateMe = () => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = Number(pos.coords.latitude.toFixed(4));
+          const lon = Number(pos.coords.longitude.toFixed(4));
+          if (map) {
+            map.flyTo({
+              center: [lon, lat],
+              zoom: 11.0,
+              speed: 1.4,
+              curve: 1.42,
+              essential: true
+            });
+          }
+          if (onLocateMe) {
+            onLocateMe();
+          }
+        },
+        (err) => {
+          console.warn('Geolocation query error:', err);
+          if (siteEta?.target_location && map) {
+            map.flyTo({
+              center: [siteEta.target_location.longitude, siteEta.target_location.latitude],
+              zoom: 10.5,
+              speed: 1.4,
+              essential: true
+            });
+          }
+          if (onLocateMe) {
+            onLocateMe();
+          }
+        },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+      );
+    } else if (siteEta?.target_location && map) {
+      map.flyTo({
+        center: [siteEta.target_location.longitude, siteEta.target_location.latitude],
+        zoom: 10.5,
+        speed: 1.4,
+        essential: true
+      });
+      if (onLocateMe) {
+        onLocateMe();
+      }
+    }
+  };
+
   const handleReset = () => {
     if (siteEta?.target_location) {
       map?.flyTo({ center: [siteEta.target_location.longitude, siteEta.target_location.latitude], zoom: 9.0, essential: true });
@@ -317,13 +366,7 @@ export const MapView: React.FC<MapViewProps> = ({
         {/* Navigation Control Bar */}
         <div className="bg-white/95 backdrop-blur-sm border border-slate-200 rounded-xl shadow-md flex flex-col overflow-hidden">
           <button
-            onClick={() => {
-              if (onLocateMe) {
-                onLocateMe();
-              } else if (siteEta?.target_location) {
-                map?.flyTo({ center: [siteEta.target_location.longitude, siteEta.target_location.latitude], zoom: 9.5, essential: true });
-              }
-            }}
+            onClick={handleLocateMe}
             title="My Location (Live GPS)"
             className="p-2.5 text-slate-600 hover:bg-amber-50 hover:text-amber-600 border-b border-slate-100 flex items-center justify-center transition-colors"
           >

@@ -156,19 +156,11 @@ export const App: React.FC = () => {
   const loadData = useCallback(async () => {
     if (mode === 'live') {
       const liveRes = await apiService.getLiveNowcast(currentCity.lat, currentCity.lon, currentCity.name);
-      // If live API returns 0 storms due to fair local weather, supply active demo convection transformed to current coordinates
-      if (!liveRes.storms || liveRes.storms.length === 0) {
-        const replayFallback = await apiService.getReplayStep(currentStepIndex, selectedHorizon);
-        const transformed = transformFrameToLocation(replayFallback, currentCity);
-        setStepData(transformed);
-        if (transformed.storms && transformed.storms.length > 0) {
-          setSelectedStorm((prev) => (prev ? transformed.storms.find((s) => s.storm_id === prev.storm_id) || transformed.storms[0] : null));
-        }
+      setStepData(liveRes);
+      if (liveRes.storms && liveRes.storms.length > 0) {
+        setSelectedStorm((prev) => (prev ? liveRes.storms.find((s) => s.storm_id === prev.storm_id) || liveRes.storms[0] : liveRes.storms[0]));
       } else {
-        setStepData(liveRes);
-        if (liveRes.storms && liveRes.storms.length > 0) {
-          setSelectedStorm((prev) => (prev ? liveRes.storms.find((s) => s.storm_id === prev.storm_id) || liveRes.storms[0] : null));
-        }
+        setSelectedStorm(null);
       }
     } else {
       const res = await apiService.getReplayStep(currentStepIndex, selectedHorizon);
