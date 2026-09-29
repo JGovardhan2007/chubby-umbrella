@@ -1,0 +1,40 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.2707,
+          13.0827
+        ]
+      },
+      "properties": {
+        "target_location": {
+          "latitude": 13.0827,
+          "longitude": 80.2707,
+          "label": "Chennai_Live_Station"
+        },
+        "timestamp": "2026-09-29T09:08:35.897433",
+        "nearest_storm_id": null,
+        "distance_km": 999.0,
+        "storm_heading_deg": 0.0,
+        "storm_speed_kmh": 0.0,
+        "is_approaching": false,
+        "estimated_arrival_minutes": null,
+        "estimated_arrival_time": null,
+        "hazard_risks": {
+          "lightning": 0.0,
+          "hail": 0.0,
+          "downburst": 0.0,
+          "cloudburst": 0.0
+        },
+        "confidence": 0.0,
+        "status": "CLEAR",
+        "feature_type": "site_eta_marker"
+      },
+      "id": "target_site_eta"
+    }
+  ]
+}

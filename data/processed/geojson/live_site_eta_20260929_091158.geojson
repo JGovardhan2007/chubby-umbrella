@@ -1,0 +1,40 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          88.3639,
+          22.5726
+        ]
+      },
+      "properties": {
+        "target_location": {
+          "latitude": 22.5726,
+          "longitude": 88.3639,
+          "label": "Kolkata_Live"
+        },
+        "timestamp": "2026-09-29T09:11:58.205927",
+        "nearest_storm_id": null,
+        "distance_km": 999.0,
+        "storm_heading_deg": 0.0,
+        "storm_speed_kmh": 0.0,
+        "is_approaching": false,
+        "estimated_arrival_minutes": null,
+        "estimated_arrival_time": null,
+        "hazard_risks": {
+          "lightning": 0.0,
+          "hail": 0.0,
+          "downburst": 0.0,
+          "cloudburst": 0.0
+        },
+        "confidence": 0.0,
+        "status": "CLEAR",
+        "feature_type": "site_eta_marker"
+      },
+      "id": "target_site_eta"
+    }
+  ]
+}

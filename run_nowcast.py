@@ -139,29 +139,156 @@ def cmd_evaluate(args):
         console.print(f"[bold cyan][OK] Evaluation JSON report saved to:[/bold cyan] {args.report_out}")
 
 
+def cmd_live(args):
+    """Fetch live operational multi-sensor weather data and run immediate 0-6hr nowcast."""
+    console.print(Panel(f"[bold green]Fetching LIVE Operational Weather Data for ({args.lat:.4f} N, {args.lon:.4f} E)...[/bold green]"))
+    config = load_config(args.config)
+    
+    # Configure domain centered on requested coordinates (+- 1.25 degrees ~250km domain)
+    domain_grid = CommonGrid(
+        min_lat=args.lat - 1.25,
+        max_lat=args.lat + 1.25,
+        min_lon=args.lon - 1.25,
+        max_lon=args.lon + 1.25,
+        resolution_km=2.0
+    )
+
+    from phase1_26084.ingestion.live_api import LiveDataFetcher
+    from phase1_26084.fusion.spatiotemporal import MultiSourceFusionEngine
+    from phase1_26084.detection.convective_initiation import ConvectiveInitiationDetector
+    from phase1_26084.tracking.tracker import StormTracker
+    from phase1_26084.nowcast.engine import NowcastEngine
+    from phase1_26084.nowcast.arrival_time import calculate_storm_arrival_for_location
+    from phase1_26084.hazards.lightning_hazard import LightningHazardEstimator
+    from phase1_26084.hazards.hail_hazard import HailHazardEstimator
+    from phase1_26084.hazards.wind_hazard import DownburstHazardEstimator
+    from phase1_26084.hazards.cloudburst_hazard import CloudburstHazardEstimator
+    from phase1_26084.geojson.exporter import export_storm_cells_geojson, export_nowcast_tracks_geojson, export_arrival_eta_geojson
+
+    fetcher = LiveDataFetcher()
+    console.print("[dim]Querying live high-resolution radar, satellite cloud top, and surface weather feeds...[/dim]")
+    radar, sat, ltg, wx = fetcher.fetch_live_grid(domain_grid)
+
+    console.print(f"[bold cyan][OK] Live Data Ingested:[/bold cyan] Radar grid ({radar.shape}), Satellite grid ({sat.shape}), AWS points ({wx.count})")
+
+    fusion = MultiSourceFusionEngine(domain_grid, config)
+    fused_frame = fusion.fuse_frame(
+        timestamp=datetime.utcnow(),
+        radar_reflectivity=radar,
+        satellite_bt=sat,
+        lightning=ltg,
+        surface_weather=wx
+    )
+
+    ci_detector = ConvectiveInitiationDetector(config)
+    candidates = ci_detector.detect(fused_frame)
+
+    tracker = StormTracker(config)
+    storms = tracker.update(candidates, fused_frame.timestamp)
+
+    ltg_hazards = LightningHazardEstimator(config)
+    hail_hazards = HailHazardEstimator(config)
+    wind_hazards = DownburstHazardEstimator(config)
+    cb_hazards = CloudburstHazardEstimator(config)
+
+    hazards_by_storm = {}
+    for stm in storms:
+        hazards_by_storm[stm.storm_id] = [
+            ltg_hazards.estimate_storm_hazard(stm, fused_frame),
+            hail_hazards.estimate_storm_hazard(stm, fused_frame),
+            wind_hazards.estimate_storm_hazard(stm, fused_frame),
+            cb_hazards.estimate_storm_hazard(stm, fused_frame)
+        ]
+
+    nowcast_engine = NowcastEngine(config)
+    nowcasts = nowcast_engine.generate_nowcast(storms, fused_frame)
+
+    site_summary = calculate_storm_arrival_for_location(
+        target_lat=args.lat,
+        target_lon=args.lon,
+        storms=storms,
+        hazards_by_storm=hazards_by_storm,
+        current_time=fused_frame.timestamp,
+        target_label=args.site_name
+    )
+
+    # Display Live Results Table
+    table = Table(title=f"LIVE Operational Nowcast | Time: {fused_frame.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')}", box=box.ROUNDED)
+    table.add_column("Category", style="cyan", no_wrap=True)
+    table.add_column("Current Live Status", style="white")
+
+    table.add_row("Live QC Status", f"[green]LIVE OPERATIONAL FEED OK[/green] (Domain: {domain_grid.min_lat:.2f}N-{domain_grid.max_lat:.2f}N, {domain_grid.min_lon:.2f}E-{domain_grid.max_lon:.2f}E)")
+    table.add_row("Detected Convective Cells", f"{len(candidates)} cells detected")
+
+    if storms:
+        stm_str = ", ".join([f"{s.storm_id} (Peak: {s.intensity:.1f} dBZ, Stage: {s.convective_stage})" for s in storms])
+        table.add_row("Active Storm Tracks", stm_str)
+    else:
+        table.add_row("Active Storm Tracks", "[green]No active severe convective storm cells currently detected in domain[/green]")
+
+    eta_str = f"Dist: {site_summary.distance_to_nearest_km:.1f} km | Status: [bold {'green' if site_summary.status == 'CLEAR' else 'magenta'}]{site_summary.status}[/]"
+    hazard_str = ", ".join([f"{k.capitalize()}: {v*100:.0f}%" for k, v in site_summary.hazard_risks.items()])
+    table.add_row(f"Target Site ({site_summary.target_label})", f"{eta_str}\nHazards: {hazard_str}")
+
+    nowcast_summary = []
+    for h in [15, 30, 60, 120, 180, 240, 300, 360]:
+        fc = nowcasts.get(h)
+        if fc:
+            nowcast_summary.append(f"+{h}m: {fc.status.value} (Conf: {fc.mean_confidence*100:.0f}%, Cells: {fc.storm_count})")
+    table.add_row("0-6h Horizons", "\n".join(nowcast_summary))
+
+    console.print(table)
+
+    # Export GeoJSON products
+    out_dir = Path(args.geojson_out)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    tag = fused_frame.timestamp.strftime("%Y%m%d_%H%M%S")
+
+    geojson_storms = export_storm_cells_geojson(storms, hazards_by_storm)
+    geojson_tracks = export_nowcast_tracks_geojson(nowcasts)
+    geojson_eta = export_arrival_eta_geojson(site_summary)
+
+    with open(out_dir / f"live_storms_{tag}.geojson", "w", encoding="utf-8") as f:
+        json.dump(geojson_storms, f, indent=2)
+    with open(out_dir / f"live_nowcast_{tag}.geojson", "w", encoding="utf-8") as f:
+        json.dump(geojson_tracks, f, indent=2)
+    with open(out_dir / f"live_site_eta_{tag}.geojson", "w", encoding="utf-8") as f:
+        json.dump(geojson_eta, f, indent=2)
+
+    console.print(f"[bold green][OK] Live Nowcast Completed successfully! GeoJSON products saved in:[/bold green] {out_dir.resolve()}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="SIH 26084: Convective-scale Nowcasting for Thunderstorms, Hail & Cloudbursts (Phase 1)"
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    # 1. generate-sample
+    # 1. live
+    p_live = subparsers.add_parser("live", help="Fetch live operational weather data and run real-time nowcast")
+    p_live.add_argument("--lat", type=float, default=13.0827, help="Target latitude (e.g. 13.0827 for Chennai, 28.6139 for Delhi)")
+    p_live.add_argument("--lon", type=float, default=80.2707, help="Target longitude (e.g. 80.2707 for Chennai, 77.2090 for Delhi)")
+    p_live.add_argument("--site-name", default="Live_Monitoring_Site", help="Site name")
+    p_live.add_argument("--config", "-c", default=None, help="Path to config YAML")
+    p_live.add_argument("--geojson-out", "-g", default="data/processed/geojson", help="Output directory for GeoJSON products")
+
+    # 2. generate-sample
     p_gen = subparsers.add_parser("generate-sample", help="Generate synthetic test datasets in NetCDF/CSV/JSON")
     p_gen.add_argument("--output-dir", "-o", default="data/sample", help="Directory to save generated sample dataset")
     p_gen.add_argument("--num-frames", "-n", type=int, default=6, help="Number of sequential time steps")
     p_gen.add_argument("--time-step-min", "-t", type=int, default=10, help="Time interval between steps (minutes)")
 
-    # 2. replay
+    # 3. replay
     p_rep = subparsers.add_parser("replay", help="Run historical event replay")
     p_rep.add_argument("--source", "-s", default="data/sample/replay_sequence_manifest.json", help="Path to manifest JSON or sample directory")
     p_rep.add_argument("--config", "-c", default=None, help="Path to custom config YAML")
-    p_rep.add_argument("--lat", type=float, default=13.0827, help="Target site latitude (e.g. 13.0827 for Chennai)")
-    p_rep.add_argument("--lon", type=float, default=80.2707, help="Target site longitude (e.g. 80.2707 for Chennai)")
+    p_rep.add_argument("--lat", type=float, default=13.0827, help="Target site latitude")
+    p_rep.add_argument("--lon", type=float, default=80.2707, help="Target site longitude")
     p_rep.add_argument("--site-name", default="Chennai_Station", help="Target site name")
     p_rep.add_argument("--geojson-out", "-g", default="data/processed/geojson", help="Output directory for GeoJSON products")
     p_rep.add_argument("--delay", "-d", type=float, default=0.0, help="Delay in seconds between replayed frames")
 
-    # 3. evaluate
+    # 4. evaluate
     p_eval = subparsers.add_parser("evaluate", help="Run model verification metrics on historical storm event")
     p_eval.add_argument("--source", "-s", default="data/sample/replay_sequence_manifest.json", help="Path to manifest JSON or sample directory")
     p_eval.add_argument("--config", "-c", default=None, help="Path to custom config YAML")
@@ -169,7 +296,9 @@ def main():
 
     args = parser.parse_args()
 
-    if args.command == "generate-sample":
+    if args.command == "live":
+        cmd_live(args)
+    elif args.command == "generate-sample":
         cmd_generate_sample(args)
     elif args.command == "replay":
         cmd_replay(args)
