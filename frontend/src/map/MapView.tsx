@@ -85,24 +85,27 @@ export const MapView: React.FC<MapViewProps> = ({
     if (siteEta) {
       const { latitude, longitude, label } = siteEta.target_location;
 
+      const markerHtml = `
+        <div class="relative flex items-center justify-center cursor-pointer group">
+          <div class="w-5 h-5 rounded-full bg-amber-500 border-2 border-white shadow-md flex items-center justify-center text-white">
+            <span class="w-2 h-2 rounded-full bg-white"></span>
+          </div>
+          <div class="absolute -bottom-6 bg-slate-900 text-white text-[10px] font-sans font-semibold px-2.5 py-0.5 rounded shadow-md whitespace-nowrap border border-slate-700">
+            ${label}
+          </div>
+        </div>
+      `;
+
       if (!siteMarkerRef.current) {
         const el = document.createElement('div');
         el.className = 'site-marker-pin';
-        el.innerHTML = `
-          <div class="relative flex items-center justify-center cursor-pointer group">
-            <div class="w-5 h-5 rounded-full bg-amber-500 border-2 border-white shadow-md flex items-center justify-center text-white">
-              <span class="w-2 h-2 rounded-full bg-white"></span>
-            </div>
-            <div class="absolute -bottom-6 bg-slate-900 text-white text-[10px] font-sans font-semibold px-2 py-0.5 rounded shadow-md whitespace-nowrap">
-              ${label}
-            </div>
-          </div>
-        `;
+        el.innerHTML = markerHtml;
 
         siteMarkerRef.current = new maplibregl.Marker({ element: el })
           .setLngLat([longitude, latitude])
           .addTo(map);
       } else {
+        siteMarkerRef.current.getElement().innerHTML = markerHtml;
         siteMarkerRef.current.setLngLat([longitude, latitude]);
       }
 

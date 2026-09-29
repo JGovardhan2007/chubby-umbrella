@@ -63,22 +63,39 @@ export const App: React.FC = () => {
     checkStatus();
   }, []);
 
+  const [currentCity, setCurrentCity] = useState<{ name: string; lat: number; lon: number }>({
+    name: 'Chennai',
+    lat: 13.0827,
+    lon: 80.2707
+  });
+
   // Fetch frame data whenever step or horizon changes
   const loadData = useCallback(async () => {
     if (mode === 'live') {
-      const liveRes = await apiService.getLiveNowcast(13.0827, 80.2707, 'Chennai_Live_Site');
+      const liveRes = await apiService.getLiveNowcast(currentCity.lat, currentCity.lon, `${currentCity.name}_Site`);
       setStepData(liveRes);
       if (liveRes.storms && liveRes.storms.length > 0) {
         setSelectedStorm((prev) => (prev ? liveRes.storms.find((s) => s.storm_id === prev.storm_id) || liveRes.storms[0] : null));
       }
     } else {
       const res = await apiService.getReplayStep(currentStepIndex, selectedHorizon);
+      // If a non-default city is selected, update the target site in replay frame
+      if (currentCity.name !== 'Chennai' && res.siteEta) {
+        res.siteEta = {
+          ...res.siteEta,
+          target_location: {
+            latitude: currentCity.lat,
+            longitude: currentCity.lon,
+            label: `${currentCity.name}_Site`
+          }
+        };
+      }
       setStepData(res);
       if (res.storms && res.storms.length > 0) {
         setSelectedStorm((prev) => (prev ? res.storms.find((s) => s.storm_id === prev.storm_id) || res.storms[0] : null));
       }
     }
-  }, [mode, currentStepIndex, selectedHorizon]);
+  }, [mode, currentStepIndex, selectedHorizon, currentCity]);
 
   useEffect(() => {
     loadData();
@@ -122,10 +139,11 @@ export const App: React.FC = () => {
     setIsPlaying(true);
   };
 
-  const [currentCityName, setCurrentCityName] = useState<string>('Chennai');
-
   const handleSelectCity = async (loc: { name: string; lat: number; lon: number }) => {
-    setCurrentCityName(loc.name);
+    setCurrentCity(loc);
+    setMode('live');
+    apiService.setMode('api');
+    setIsPlaying(false);
     try {
       const liveRes = await apiService.getLiveNowcast(loc.lat, loc.lon, `${loc.name}_Site`);
       setStepData(liveRes);
@@ -153,7 +171,7 @@ export const App: React.FC = () => {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onSelectCity={handleSelectCity}
-        currentLocationName={currentCityName}
+        currentLocationName={currentCity.name}
       />
 
       {/* 2. MAIN CONTENT AREA (Left Sidebar + Large Map + Right Info Panel) */}
@@ -185,17 +203,18 @@ export const App: React.FC = () => {
               lightningFlashes={stepData?.lightningFlashes}
               onMapClickLocation={(lat, lon) => {
                 if (mode === 'live') {
-                  apiService.getLiveNowcast(lat, lon, 'Custom_Map_Location').then(setStepData);
+                  apiService.getLiveNowcast(lat, lon, `${currentCity.name}_Site`).then(setStepData);
                 }
               }}
             />
           </div>
 
-          {/* BOTTOM CONVECTIVE CARDS (Exact match to "List University" cards in mockup) */}
+          {/* BOTTOM CONVECTIVE CARDS */}
           <ConvectiveCards
             storms={stepData?.storms || []}
             selectedStorm={selectedStorm}
             onSelectStorm={setSelectedStorm}
+            cityName={currentCity.name}
           />
         </main>
 

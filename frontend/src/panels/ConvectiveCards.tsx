@@ -21,12 +21,14 @@ interface ConvectiveCardsProps {
   storms: StormCell[];
   selectedStorm: StormCell | null;
   onSelectStorm: (storm: StormCell) => void;
+  cityName?: string;
 }
 
 export const ConvectiveCards: React.FC<ConvectiveCardsProps> = ({
   storms,
   selectedStorm,
-  onSelectStorm
+  onSelectStorm,
+  cityName = 'Chennai'
 }) => {
   // Height state for panel resizing (min: 44px collapsed, default: 210px, max: 480px)
   const [panelHeight, setPanelHeight] = useState<number>(210);
@@ -141,9 +143,9 @@ export const ConvectiveCards: React.FC<ConvectiveCardsProps> = ({
   ];
 
   const locationLabels = [
-    'Ennore Port & North Chennai Sector',
-    'Sriperumbudur & Kanchipuram Belt',
-    'Tirupati Corridor & Sriharikota'
+    `${cityName} Central & Urban Sector`,
+    `${cityName} North-West Industrial Corridor`,
+    `${cityName} Outer Ring & Suburbs`
   ];
 
   return (
