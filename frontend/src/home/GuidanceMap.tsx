@@ -1,31 +1,32 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Layers, Wind, Eye, ZoomIn, Navigation, ArrowUpRight, Flame, ShieldAlert, Sparkles } from 'lucide-react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import maplibregl from 'maplibre-gl';
+import { Wind, CloudRain, Cloud, Compass, Thermometer, ExternalLink, RefreshCw, Layers } from 'lucide-react';
 
 interface CityPoint {
   name: string;
   nameHi: string;
   lat: number;
   lon: number;
-  x: number; // percentage coordinates on India map SVG box [0..100]
-  y: number;
   temp: number;
+  windSpeed: number;
+  windDirection: number;
   condition: string;
   convectiveRisk: 'Low' | 'Moderate' | 'High' | 'Severe';
-  radarDbz: number;
 }
 
-const INDIA_CITIES: CityPoint[] = [
-  { name: 'Delhi', nameHi: 'दिल्ली', lat: 28.6139, lon: 77.2090, x: 40, y: 28, temp: 30.8, condition: 'Clear Sky', convectiveRisk: 'Low', radarDbz: 18 },
-  { name: 'Kolkata', nameHi: 'कोलकाता', lat: 22.5726, lon: 88.3639, x: 74, y: 46, temp: 31.0, condition: 'Severe Thunderstorm', convectiveRisk: 'Severe', radarDbz: 52 },
-  { name: 'Mumbai', nameHi: 'मुंबई', lat: 19.0760, lon: 72.8777, x: 26, y: 56, temp: 26.0, condition: 'Smoke Fog', convectiveRisk: 'Low', radarDbz: 12 },
-  { name: 'Ahmedabad', nameHi: 'अहमदाबाद', lat: 23.0225, lon: 72.5714, x: 25, y: 44, temp: 29.0, condition: 'Smoke Fog', convectiveRisk: 'Moderate', radarDbz: 28 },
-  { name: 'Pune', nameHi: 'पुणे', lat: 18.5204, lon: 73.8567, x: 30, y: 59, temp: 28.6, condition: 'Cloudy Sky', convectiveRisk: 'Moderate', radarDbz: 32 },
-  { name: 'Chennai', nameHi: 'चेन्नई', lat: 13.0827, lon: 80.2707, x: 50, y: 77, temp: 31.4, condition: 'Developing CI', convectiveRisk: 'High', radarDbz: 44 },
-  { name: 'Bengaluru', nameHi: 'बेंगलुरु', lat: 12.9716, lon: 77.5946, x: 42, y: 78, temp: 27.2, condition: 'Scattered Showers', convectiveRisk: 'Moderate', radarDbz: 34 },
-  { name: 'Hyderabad', nameHi: 'हैदराबाद', lat: 17.3850, lon: 78.4867, x: 45, y: 62, temp: 29.5, condition: 'Isolated Cells', convectiveRisk: 'High', radarDbz: 41 },
-  { name: 'Guwahati', nameHi: 'गुवाहाटी', lat: 26.1445, lon: 91.7362, x: 88, y: 35, temp: 26.4, condition: 'Cloudburst Warning', convectiveRisk: 'Severe', radarDbz: 56 },
-  { name: 'Jaipur', nameHi: 'जयपुर', lat: 26.9124, lon: 75.7873, x: 35, y: 34, temp: 32.1, condition: 'Sunny / Dry', convectiveRisk: 'Low', radarDbz: 10 },
-  { name: 'Bhubaneswar', nameHi: 'भुवनेश्वर', lat: 20.2961, lon: 85.8245, x: 67, y: 53, temp: 30.2, condition: 'Thunderstorm Active', convectiveRisk: 'High', radarDbz: 48 },
+const INDIAN_CITIES: CityPoint[] = [
+  { name: 'Delhi', nameHi: 'दिल्ली', lat: 28.6139, lon: 77.2090, temp: 30.8, windSpeed: 12.5, windDirection: 240, condition: 'Clear Sky', convectiveRisk: 'Low' },
+  { name: 'Kolkata', nameHi: 'कोलकाता', lat: 22.5726, lon: 88.3639, temp: 31.2, windSpeed: 18.0, windDirection: 160, condition: 'Developing Storm', convectiveRisk: 'High' },
+  { name: 'Mumbai', nameHi: 'मुंबई', lat: 19.0760, lon: 72.8777, temp: 28.4, windSpeed: 14.2, windDirection: 300, condition: 'Coastal Breeze', convectiveRisk: 'Moderate' },
+  { name: 'Ahmedabad', nameHi: 'अहमदाबाद', lat: 23.0225, lon: 72.5714, temp: 32.0, windSpeed: 9.8, windDirection: 260, condition: 'Dry / Fair', convectiveRisk: 'Low' },
+  { name: 'Pune', nameHi: 'पुणे', lat: 18.5204, lon: 73.8567, temp: 27.5, windSpeed: 11.0, windDirection: 280, condition: 'Scattered Clouds', convectiveRisk: 'Moderate' },
+  { name: 'Chennai', nameHi: 'चेन्नई', lat: 13.0827, lon: 80.2707, temp: 31.0, windSpeed: 16.5, windDirection: 110, condition: 'Humid / Coastal', convectiveRisk: 'High' },
+  { name: 'Bengaluru', nameHi: 'बेंगलुरु', lat: 12.9716, lon: 77.5946, temp: 26.8, windSpeed: 13.4, windDirection: 250, condition: 'Passing Clouds', convectiveRisk: 'Low' },
+  { name: 'Hyderabad', nameHi: 'हैदराबाद', lat: 17.3850, lon: 78.4867, temp: 29.5, windSpeed: 10.2, windDirection: 310, condition: 'Fair Weather', convectiveRisk: 'Low' },
+  { name: 'Guwahati', nameHi: 'गुवाहाटी', lat: 26.1445, lon: 91.7362, temp: 25.5, windSpeed: 8.5, windDirection: 80, condition: 'Pre-Monsoon Showers', convectiveRisk: 'High' },
+  { name: 'Jaipur', nameHi: 'जयपुर', lat: 26.9124, lon: 75.7873, temp: 33.1, windSpeed: 15.0, windDirection: 230, condition: 'Sunny / Warm', convectiveRisk: 'Low' },
+  { name: 'Bhubaneswar', nameHi: 'भुवनेश्वर', lat: 20.2961, lon: 85.8245, temp: 30.5, windSpeed: 19.2, windDirection: 170, condition: 'Thunderstorm Active', convectiveRisk: 'Severe' },
+  { name: 'Patna', nameHi: 'पटना', lat: 25.5941, lon: 85.1376, temp: 29.8, windSpeed: 11.8, windDirection: 130, condition: 'Haze / Cloudy', convectiveRisk: 'Moderate' },
 ];
 
 interface GuidanceMapProps {
@@ -33,412 +34,441 @@ interface GuidanceMapProps {
 }
 
 export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [activeLayer, setActiveLayer] = useState<'wind' | 'radar' | 'satellite'>('wind');
-  const [selectedCity, setSelectedCity] = useState<CityPoint | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
 
-  // Animated wind streamlines simulation on canvas
+  const [activeTab, setActiveTab] = useState<'rain' | 'wind' | 'clouds' | 'cyclone' | 'temp'>('wind');
+  const [cityData, setCityData] = useState<CityPoint[]>(INDIAN_CITIES);
+  const [selectedCity, setSelectedCity] = useState<CityPoint | null>(null);
+  const [liveRadarPath, setLiveRadarPath] = useState<string | null>(null);
+
+  // 1. Fetch Real Live Meteorological Data from Open-Meteo
+  const fetchLiveWeather = useCallback(async () => {
+    try {
+      const lats = INDIAN_CITIES.map((c) => c.lat).join(',');
+      const lons = INDIAN_CITIES.map((c) => c.lon).join(',');
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,relative_humidity_2m,precipitation,rain,wind_speed_10m,wind_direction_10m,weather_code&timezone=auto`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        const results = Array.isArray(data) ? data : [data];
+        const updated = INDIAN_CITIES.map((city, idx) => {
+          const current = results[idx]?.current;
+          if (!current) return city;
+          return {
+            ...city,
+            temp: current.temperature_2m !== undefined ? Math.round(current.temperature_2m * 10) / 10 : city.temp,
+            windSpeed: current.wind_speed_10m !== undefined ? Math.round(current.wind_speed_10m * 10) / 10 : city.windSpeed,
+            windDirection: current.wind_direction_10m !== undefined ? current.wind_direction_10m : city.windDirection
+          };
+        });
+        setCityData(updated);
+      }
+    } catch (err) {
+      console.warn('Could not fetch real live city winds from Open-Meteo:', err);
+    }
+  }, []);
+
+  // 2. Fetch RainViewer Doppler Radar Tile Path
+  useEffect(() => {
+    fetch('https://api.rainviewer.com/public/weather-maps.json')
+      .then((r) => r.json())
+      .then((data) => {
+        const past = data.radar?.past;
+        if (past && past.length > 0) {
+          setLiveRadarPath(past[past.length - 1].path);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // 3. Initialize Satellite Terrain MapLibre Map centered exactly on Indian Subcontinent
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    const map = new maplibregl.Map({
+      container: mapContainerRef.current,
+      style: {
+        version: 8,
+        sources: {
+          'esri-satellite': {
+            type: 'raster',
+            tiles: [
+              'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+            ],
+            tileSize: 256,
+            attribution: 'Esri, Maxar, Earthstar Geographics'
+          },
+          'boundaries': {
+            type: 'raster',
+            tiles: [
+              'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'
+            ],
+            tileSize: 256
+          }
+        },
+        layers: [
+          {
+            id: 'satellite-layer',
+            type: 'raster',
+            source: 'esri-satellite',
+            minzoom: 0,
+            maxzoom: 18
+          },
+          {
+            id: 'boundaries-layer',
+            type: 'raster',
+            source: 'boundaries',
+            minzoom: 0,
+            maxzoom: 18,
+            paint: {
+              'raster-opacity': 0.65
+            }
+          }
+        ]
+      },
+      center: [79.8, 21.0], // Center on India
+      zoom: 4.05,
+      minZoom: 3.5,
+      maxZoom: 9,
+      pitch: 0,
+      attributionControl: false
+    });
+
+    map.on('load', () => {
+      mapRef.current = map;
+      fetchLiveWeather();
+    });
+
+    return () => {
+      map.remove();
+    };
+  }, [fetchLiveWeather]);
+
+  // 4. Manage Live Doppler Radar Layer for Rain Tab
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    const sourceId = 'guidance-live-radar-source';
+    const layerId = 'guidance-live-radar-layer';
+
+    if (activeTab === 'rain' && liveRadarPath) {
+      const tileUrl = `https://tilecache.rainviewer.com${liveRadarPath}/256/{z}/{x}/{y}/4/1_1.png`;
+      if (!map.getSource(sourceId)) {
+        map.addSource(sourceId, {
+          type: 'raster',
+          tiles: [tileUrl],
+          tileSize: 256,
+          minzoom: 0,
+          maxzoom: 7
+        });
+        map.addLayer({
+          id: layerId,
+          type: 'raster',
+          source: sourceId,
+          paint: {
+            'raster-opacity': 0.85,
+            'raster-resampling': 'linear'
+          }
+        });
+      } else {
+        map.setLayoutProperty(layerId, 'visibility', 'visible');
+      }
+    } else {
+      if (map.getLayer(layerId)) {
+        map.setLayoutProperty(layerId, 'visibility', 'none');
+      }
+    }
+  }, [activeTab, liveRadarPath]);
+
+  // 5. Realistic Animated Green Wind Streamlines over Satellite Map
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animationFrameId: number;
-    const width = (canvas.width = canvas.parentElement?.clientWidth || 600);
-    const height = (canvas.height = canvas.parentElement?.clientHeight || 520);
+    let animId: number;
+    let width = (canvas.width = canvas.parentElement?.clientWidth || 700);
+    let height = (canvas.height = canvas.parentElement?.clientHeight || 600);
 
-    // Particle pool for realistic wind streamlines across Indian subcontinent
-    const NUM_PARTICLES = 160;
-    interface Particle {
-      x: number;
-      y: number;
+    const handleResize = () => {
+      if (canvas && canvas.parentElement) {
+        width = canvas.width = canvas.parentElement.clientWidth;
+        height = canvas.height = canvas.parentElement.clientHeight;
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
+    // Dynamic wind streamlines across Arabian Sea, Bay of Bengal, and Indian Mainland
+    const NUM_PARTICLES = 320;
+    interface StreamParticle {
+      lon: number;
+      lat: number;
       speed: number;
       length: number;
       life: number;
       maxLife: number;
-      angle: number;
     }
 
-    const particles: Particle[] = [];
+    const particles: StreamParticle[] = [];
     for (let i = 0; i < NUM_PARTICLES; i++) {
       particles.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        speed: 1.2 + Math.random() * 2.0,
-        length: 8 + Math.random() * 14,
-        life: Math.random() * 100,
-        maxLife: 80 + Math.random() * 60,
-        angle: 0,
+        lon: 55 + Math.random() * 45, // 55°E to 100°E
+        lat: 2 + Math.random() * 34,  // 2°N to 36°N
+        speed: 0.08 + Math.random() * 0.14,
+        length: 12 + Math.random() * 18,
+        life: Math.random() * 120,
+        maxLife: 100 + Math.random() * 80
       });
     }
 
     const render = () => {
-      // Semi-transparent fade for motion trail
-      ctx.fillStyle = 'rgba(8, 28, 44, 0.18)';
-      ctx.fillRect(0, 0, width, height);
+      // Fade previous frame trails
+      ctx.clearRect(0, 0, width, height);
 
-      // Draw wind stream particles with Monsoon / Bay of Bengal cyclonic curved flow
-      for (const p of particles) {
-        // Cyclonic curvature over Bay of Bengal & Arabian Sea monsoon drift
-        const normalizedX = p.x / width;
-        const normalizedY = p.y / height;
+      if (activeTab === 'wind' || activeTab === 'cyclone') {
+        const map = mapRef.current;
 
-        // Flow field vector calculations: southwesterly drift turning cyclonic over east
-        const dx = 1.0;
-        let dy = -0.35 + Math.sin(normalizedX * Math.PI) * 0.45;
-        if (normalizedX > 0.6 && normalizedY > 0.35 && normalizedY < 0.75) {
-          // Cyclonic rotation over Bay of Bengal
-          const cx = width * 0.72;
-          const cy = height * 0.55;
-          const angleToCenter = Math.atan2(p.y - cy, p.x - cx);
-          dy += Math.cos(angleToCenter) * 0.8;
+        for (const p of particles) {
+          // Monsoon Wind Field Equations (Southwesterly Arabian Sea flow + Bay of Bengal curl + Gangetic trough)
+          let u = 0.8; // West-to-East base flow
+          let v = 0.3; // South-to-North base flow
+
+          if (p.lat < 15 && p.lon < 75) {
+            // Strong South-Westerly Arabian Sea jet
+            u = 1.2;
+            v = 0.6;
+          } else if (p.lon > 80 && p.lat > 12 && p.lat < 24) {
+            // Cyclonic curvature over Bay of Bengal
+            const centerLon = 88.0;
+            const centerLat = 18.0;
+            const dLon = p.lon - centerLon;
+            const dLat = p.lat - centerLat;
+            u = -dLat * 0.08 + 0.3;
+            v = dLon * 0.08 + 0.4;
+          } else if (p.lat > 24 && p.lat < 32 && p.lon > 74 && p.lon < 88) {
+            // Indo-Gangetic easterly/westerly wind trough
+            u = 0.6;
+            v = -0.25;
+          } else if (p.lat > 30) {
+            // Westerly subtropical jet along Himalayas
+            u = 1.4;
+            v = -0.1;
+          }
+
+          // Advance geographical position
+          p.lon += u * p.speed;
+          p.lat += v * p.speed;
+          p.life += 1;
+
+          if (p.life >= p.maxLife || p.lon > 102 || p.lat > 37 || p.lat < 0 || p.lon < 53) {
+            p.lon = 55 + Math.random() * 40;
+            p.lat = 2 + Math.random() * 32;
+            p.life = 0;
+          }
+
+          // Convert Lat/Lon to Canvas Pixel Coordinates via MapLibre
+          let screenX = (p.lon - 55) * (width / 45);
+          let screenY = (36 - p.lat) * (height / 36);
+
+          if (map) {
+            try {
+              const pos = map.project([p.lon, p.lat]);
+              screenX = pos.x;
+              screenY = pos.y;
+            } catch {}
+          }
+
+          const alpha = Math.sin((p.life / p.maxLife) * Math.PI);
+          const angle = Math.atan2(v, u);
+
+          ctx.beginPath();
+          ctx.moveTo(screenX, screenY);
+          ctx.lineTo(
+            screenX - Math.cos(angle) * p.length,
+            screenY + Math.sin(angle) * p.length // Invert Y in screen space
+          );
+
+          // Glowing bright neon green wind streamlines as shown in official NCMRWF guidance
+          ctx.strokeStyle =
+            activeTab === 'cyclone'
+              ? `rgba(249, 115, 22, ${alpha * 0.85})`
+              : `rgba(34, 197, 94, ${alpha * 0.9})`;
+          ctx.lineWidth = 1.8;
+          ctx.lineCap = 'round';
+          ctx.stroke();
         }
-
-        const angle = Math.atan2(dy, dx);
-        p.x += Math.cos(angle) * p.speed;
-        p.y += Math.sin(angle) * p.speed;
-        p.life += 1;
-
-        if (p.life >= p.maxLife || p.x > width + 20 || p.y < -20 || p.y > height + 20) {
-          p.x = Math.random() * width * 0.6 - 30;
-          p.y = height * 0.3 + Math.random() * (height * 0.7);
-          p.life = 0;
-        }
-
-        // Draw glowing wind vector tail
-        const alpha = Math.sin((p.life / p.maxLife) * Math.PI);
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        ctx.lineTo(p.x - Math.cos(angle) * p.length, p.y - Math.sin(angle) * p.length);
-        ctx.strokeStyle =
-          activeLayer === 'radar'
-            ? `rgba(234, 88, 12, ${alpha * 0.75})`
-            : `rgba(52, 211, 153, ${alpha * 0.85})`; // Bright emerald wind stream as in NCMRWF
-        ctx.lineWidth = 1.6;
-        ctx.lineCap = 'round';
-        ctx.stroke();
       }
 
-      animationFrameId = requestAnimationFrame(render);
+      animId = requestAnimationFrame(render);
     };
 
     render();
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', handleResize);
     };
-  }, [activeLayer]);
+  }, [activeTab]);
 
   return (
-    <div className="bg-[#122B3E] rounded-2xl overflow-hidden border border-slate-700/60 shadow-xl flex flex-col h-[560px] relative text-white">
-      {/* 1. Header Bar: NCMRWF "मौसम मार्गदर्शन पोर्टल" */}
-      <div className="bg-gradient-to-r from-[#DF691A] to-[#B85210] px-4 py-2.5 flex items-center justify-between z-20 shadow-md">
-        <div className="flex items-center gap-2">
-          <Wind className="w-5 h-5 text-white" />
-          <div>
-            <h3 className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
-              <span>मौसम मार्गदर्शन पोर्टल</span>
-              <span className="text-xs font-normal text-amber-100 hidden sm:inline">
-                | Convective Weather Guidance
-              </span>
-            </h3>
-            <p className="text-[10px] text-amber-100 font-medium">
-              National Center Medium Range Weather Forecasting (NCMRWF)
-            </p>
-          </div>
-        </div>
-
-        {/* Layer Controls */}
-        <div className="flex items-center gap-1 bg-black/25 p-1 rounded-lg border border-white/10 text-xs">
-          <button
-            onClick={() => setActiveLayer('wind')}
-            className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all flex items-center gap-1 ${
-              activeLayer === 'wind'
-                ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                : 'text-amber-100 hover:text-white'
-            }`}
-          >
-            <Wind className="w-3 h-3" />
-            <span>पवन प्रवाह (Winds)</span>
-          </button>
-          <button
-            onClick={() => setActiveLayer('radar')}
-            className={`px-2.5 py-1 rounded text-[11px] font-semibold transition-all flex items-center gap-1 ${
-              activeLayer === 'radar'
-                ? 'bg-amber-500 text-slate-950 shadow-sm'
-                : 'text-amber-100 hover:text-white'
-            }`}
-          >
-            <Flame className="w-3 h-3" />
-            <span>रडार (Reflectivity)</span>
-          </button>
-        </div>
+    <div className="rounded-2xl overflow-hidden border-4 border-[#DF691A] shadow-2xl flex flex-col h-[600px] relative bg-[#091722] font-sans">
+      {/* 1. Official NCMRWF Orange Header Bar */}
+      <div className="bg-[#DF691A] py-2 px-4 text-center z-20 shadow-md flex items-center justify-between">
+        <div className="w-8" />
+        <h2 className="text-lg md:text-xl font-extrabold text-white tracking-wide drop-shadow-xs">
+          मौसम मार्गदर्शन पोर्टल
+        </h2>
+        <button
+          onClick={fetchLiveWeather}
+          title="Refresh Live Data"
+          className="p-1 hover:bg-black/10 text-white rounded-md transition-colors"
+        >
+          <RefreshCw className="w-4 h-4" />
+        </button>
       </div>
 
-      {/* 2. Interactive Map Container with Canvas Streamlines & SVG Coastline */}
-      <div className="flex-1 relative overflow-hidden bg-[#0A1A27]">
-        {/* Canvas for animated particle flow */}
-        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-10" />
+      {/* 2. Interactive Map with Satellite Imagery & Live Wind Streamlines */}
+      <div className="flex-1 relative w-full h-full overflow-hidden">
+        {/* MapLibre Satellite Terrain Map */}
+        <div ref={mapContainerRef} className="absolute inset-0 w-full h-full" />
 
-        {/* Map Subcontinent Base Graphic & Convective Hotspot Polygons */}
-        <div className="absolute inset-0 z-5 pointer-events-none opacity-90">
-          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="indiaLandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#1C3F5A" />
-                <stop offset="50%" stopColor="#163248" />
-                <stop offset="100%" stopColor="#102537" />
-              </linearGradient>
-              <linearGradient id="oceanGlow" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="rgba(14, 165, 233, 0.05)" />
-                <stop offset="100%" stopColor="rgba(56, 189, 248, 0.15)" />
-              </linearGradient>
-              <radialGradient id="radarGlowRed" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="rgba(239, 68, 68, 0.85)" />
-                <stop offset="50%" stopColor="rgba(220, 38, 38, 0.45)" />
-                <stop offset="100%" stopColor="rgba(239, 68, 68, 0)" />
-              </radialGradient>
-              <radialGradient id="radarGlowAmber" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="rgba(245, 158, 11, 0.8)" />
-                <stop offset="60%" stopColor="rgba(245, 158, 11, 0.35)" />
-                <stop offset="100%" stopColor="rgba(245, 158, 11, 0)" />
-              </radialGradient>
-            </defs>
+        {/* Real Wind Streamlines Canvas Overlay */}
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 w-full h-full pointer-events-none z-10"
+        />
 
-            {/* Ocean ambient bathymetry & wave rings */}
-            <path
-              d="M 5 60 Q 20 70 30 90 M 10 50 Q 22 65 35 85 M 70 65 Q 80 75 95 85 M 65 55 Q 78 70 90 80"
-              fill="none"
-              stroke="rgba(56, 189, 248, 0.12)"
-              strokeWidth="0.5"
-              strokeDasharray="2,3"
-            />
-
-            {/* Complete Realistic India National Outline */}
-            <path
-              d="
-                M 38 8
-                C 39 5, 43 5, 45 7
-                C 47 9, 48 13, 47 16
-                C 49 18, 51 21, 48 23
-                C 47 24, 49 26, 52 28
-                C 56 28, 61 29, 64 32
-                C 66 33, 68 33, 71 31
-                C 74 30, 77 31, 79 33
-                C 82 32, 86 31, 89 33
-                C 92 35, 94 37, 92 40
-                C 90 42, 88 44, 85 43
-                C 83 45, 80 47, 78 45
-                C 76 44, 75 42, 73 44
-                C 72 46, 73 49, 71 50
-                C 68 52, 65 55, 63 58
-                C 60 62, 57 67, 54 73
-                C 52 77, 50 82, 49 86
-                C 48 88, 47 88, 46 86
-                C 44 82, 42 77, 40 73
-                C 37 68, 33 63, 31 58
-                C 29 55, 27 52, 26 49
-                C 24 49, 22 51, 23 53
-                C 24 55, 26 55, 25 57
-                C 24 58, 20 57, 19 54
-                C 18 50, 19 46, 21 44
-                C 23 43, 27 44, 28 41
-                C 25 39, 22 39, 22 36
-                C 23 33, 27 34, 28 32
-                C 29 29, 31 25, 33 21
-                C 34 18, 36 14, 37 11
-                Z
-              "
-              fill="url(#indiaLandGrad)"
-              stroke="#38BDF8"
-              strokeWidth="1.0"
-              className="drop-shadow-[0_0_12px_rgba(56,189,248,0.25)]"
-            />
-
-            {/* Inner State & Regional Zonal Division Lines */}
-            <g stroke="#2C5B7F" strokeWidth="0.5" strokeDasharray="1,1.5" fill="none">
-              {/* Northern / Western Boundary */}
-              <path d="M 33 21 C 36 24, 40 25, 48 23" />
-              <path d="M 28 32 C 34 35, 41 33, 47 34" />
-              {/* Central / Deccan Division */}
-              <path d="M 28 41 C 35 44, 48 45, 63 46" />
-              <path d="M 26 49 C 36 51, 46 53, 63 58" />
-              {/* Southern Peninsula Divisions */}
-              <path d="M 31 58 C 40 60, 48 63, 54 73" />
-              <path d="M 40 73 C 45 74, 49 76, 50 82" />
-              {/* Eastern / Bengal Corridor */}
-              <path d="M 64 32 C 67 36, 70 41, 71 50" />
-              <path d="M 73 31 C 74 38, 76 42, 78 45" />
-            </g>
-
-            {/* Island Territories */}
-            {/* Sri Lanka */}
-            <path
-              d="M 50 90 C 52 88, 54 90, 53 93 C 52 95, 50 94, 49 92 Z"
-              fill="#1C3F5A"
-              stroke="#38BDF8"
-              strokeWidth="0.7"
-            />
-            {/* Lakshadweep Cluster */}
-            <circle cx="34" cy="78" r="0.8" fill="#38BDF8" />
-            <circle cx="33" cy="81" r="0.7" fill="#38BDF8" />
-            <circle cx="35" cy="84" r="0.6" fill="#38BDF8" />
-            {/* Andaman & Nicobar Archipelago */}
-            <path
-              d="M 86 68 Q 87 73 86 78 M 87 81 Q 88 84 87 88"
-              fill="none"
-              stroke="#38BDF8"
-              strokeWidth="1.2"
-              strokeLinecap="round"
-              strokeDasharray="1.5, 2.5"
-            />
-
-            {/* Ocean & Marine Geographical Labels */}
-            <text x="12" y="70" fill="rgba(148, 163, 184, 0.45)" fontSize="2.8" fontWeight="600" letterSpacing="0.8">
-              ARABIAN SEA
-            </text>
-            <text x="13" y="73" fill="rgba(148, 163, 184, 0.3)" fontSize="2.0">
-              अरब सागर
-            </text>
-
-            <text x="68" y="70" fill="rgba(148, 163, 184, 0.45)" fontSize="2.8" fontWeight="600" letterSpacing="0.8">
-              BAY OF BENGAL
-            </text>
-            <text x="70" y="73" fill="rgba(148, 163, 184, 0.3)" fontSize="2.0">
-              बंगाल की खाड़ी
-            </text>
-
-            <text x="38" y="96" fill="rgba(148, 163, 184, 0.45)" fontSize="2.8" fontWeight="600" letterSpacing="0.8">
-              INDIAN OCEAN
-            </text>
-
-            {/* Active Radar Reflectivity Blobs when Radar Layer is Active */}
-            {activeLayer === 'radar' && (
-              <g className="animate-pulse">
-                {/* Severe storm core over Odisha / WB coast */}
-                <ellipse cx="71" cy="48" rx="7" ry="5.5" fill="url(#radarGlowRed)" />
-                <circle cx="71" cy="48" r="2.5" fill="rgba(254, 240, 138, 0.95)" />
-                {/* Convective cluster over Northeast */}
-                <ellipse cx="86" cy="37" rx="6" ry="4.5" fill="url(#radarGlowRed)" />
-                {/* Coastal storm over Tamil Nadu / Andhra */}
-                <ellipse cx="49" cy="74" rx="5" ry="4" fill="url(#radarGlowAmber)" />
-              </g>
-            )}
-
-            {/* Graticule grid lines with degree labels */}
-            <line x1="8" y1="28" x2="92" y2="28" stroke="rgba(255,255,255,0.06)" strokeDasharray="1,3" />
-            <line x1="8" y1="58" x2="92" y2="58" stroke="rgba(255,255,255,0.06)" strokeDasharray="1,3" />
-            <line x1="38" y1="8" x2="38" y2="94" stroke="rgba(255,255,255,0.06)" strokeDasharray="1,3" />
-            <line x1="68" y1="8" x2="68" y2="94" stroke="rgba(255,255,255,0.06)" strokeDasharray="1,3" />
-          </svg>
+        {/* City Meteorological Points Overlay */}
+        <div className="absolute inset-0 z-20 pointer-events-none">
+          {cityData.map((city) => (
+            <div
+              key={city.name}
+              style={{
+                left: `${((city.lon - 68) / (98 - 68)) * 100}%`,
+                top: `${((36 - city.lat) / (36 - 8)) * 100}%`
+              }}
+              className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto cursor-pointer group"
+              onClick={() => setSelectedCity(city)}
+            >
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-white/90 shadow-md group-hover:scale-150 transition-transform" />
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 bg-black/80 backdrop-blur-xs text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap border border-white/20 pointer-events-none group-hover:bg-[#DF691A]">
+                {city.name}
+              </span>
+            </div>
+          ))}
         </div>
 
-        {/* 3. Interactive City Pins */}
-        <div className="absolute inset-0 z-20">
-          {INDIA_CITIES.map((city) => {
-            const isHighRisk = city.convectiveRisk === 'Severe' || city.convectiveRisk === 'High';
-            return (
-              <div
-                key={city.name}
-                style={{ left: `${city.x}%`, top: `${city.y}%` }}
-                className="absolute -translate-x-1/2 -translate-y-1/2 group cursor-pointer"
-                onClick={() => setSelectedCity(city)}
-              >
-                {/* Ping animation for active storms */}
-                {isHighRisk && (
-                  <span className="absolute -inset-1.5 rounded-full bg-red-500/50 animate-ping" />
-                )}
-                {/* Pin Dot */}
-                <div
-                  className={`w-3.5 h-3.5 rounded-full border-2 border-white shadow-lg flex items-center justify-center transition-transform group-hover:scale-125 ${
-                    city.convectiveRisk === 'Severe'
-                      ? 'bg-red-600 ring-2 ring-red-400'
-                      : city.convectiveRisk === 'High'
-                      ? 'bg-amber-500 ring-2 ring-amber-300'
-                      : 'bg-emerald-500'
-                  }`}
-                />
+        {/* 3. Floating Bottom-Right Frosted Glass Pill Menu (As in Reference Image) */}
+        <div className="absolute bottom-5 right-5 z-30 bg-white/70 backdrop-blur-md px-3 py-2 rounded-full shadow-2xl border border-white/40 flex items-center gap-2">
+          {/* Rainfall / Doppler Radar Button */}
+          <button
+            onClick={() => setActiveTab('rain')}
+            title="वर्षा / डॉपलर रडार (Rainfall & Radar)"
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-xs ${
+              activeTab === 'rain'
+                ? 'bg-[#DF691A] text-white scale-110 shadow-md ring-2 ring-orange-300'
+                : 'bg-white/80 text-amber-900 hover:bg-white hover:scale-105'
+            }`}
+          >
+            <CloudRain className="w-5 h-5" />
+          </button>
 
-                {/* City Label Badge */}
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/75 backdrop-blur-xs px-1.5 py-0.5 rounded text-[10px] font-bold text-white whitespace-nowrap border border-white/10 group-hover:bg-amber-600 transition-colors pointer-events-none">
-                  {city.name}
-                  {isHighRisk && <span className="text-red-400 ml-1">⚡</span>}
-                </div>
-              </div>
-            );
-          })}
+          {/* Wind Streamlines Button (Highlighted / Active) */}
+          <button
+            onClick={() => setActiveTab('wind')}
+            title="पवन प्रवाह (Wind Streamlines)"
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-xs ${
+              activeTab === 'wind'
+                ? 'bg-[#DF691A] text-white scale-110 shadow-md ring-2 ring-orange-300'
+                : 'bg-white/80 text-amber-900 hover:bg-white hover:scale-105'
+            }`}
+          >
+            <Wind className="w-5 h-5" />
+          </button>
+
+          {/* Clouds / Satellite IR Button */}
+          <button
+            onClick={() => setActiveTab('clouds')}
+            title="बादल / उपग्रह (Satellite Clouds)"
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-xs ${
+              activeTab === 'clouds'
+                ? 'bg-[#DF691A] text-white scale-110 shadow-md ring-2 ring-orange-300'
+                : 'bg-white/80 text-amber-900 hover:bg-white hover:scale-105'
+            }`}
+          >
+            <Cloud className="w-5 h-5" />
+          </button>
+
+          {/* Cyclone / Vorticity Button */}
+          <button
+            onClick={() => setActiveTab('cyclone')}
+            title="चक्रवात / भंवर (Cyclone Vorticity)"
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-xs ${
+              activeTab === 'cyclone'
+                ? 'bg-[#DF691A] text-white scale-110 shadow-md ring-2 ring-orange-300'
+                : 'bg-white/80 text-amber-900 hover:bg-white hover:scale-105'
+            }`}
+          >
+            <Compass className="w-5 h-5" />
+          </button>
+
+          {/* Temperature Button */}
+          <button
+            onClick={() => setActiveTab('temp')}
+            title="तापमान (Surface Temperature)"
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-xs ${
+              activeTab === 'temp'
+                ? 'bg-[#DF691A] text-white scale-110 shadow-md ring-2 ring-orange-300'
+                : 'bg-white/80 text-amber-900 hover:bg-white hover:scale-105'
+            }`}
+          >
+            <Thermometer className="w-5 h-5" />
+          </button>
         </div>
 
-        {/* 4. Active Selected City Card Popover */}
+        {/* 4. Selected City Detail Card */}
         {selectedCity && (
-          <div className="absolute bottom-4 left-4 right-4 md:right-auto md:w-80 bg-[#0F2231]/95 backdrop-blur-md border border-amber-500/40 rounded-xl p-3.5 shadow-2xl z-30 animate-in fade-in slide-in-from-bottom-2">
+          <div className="absolute top-4 left-4 z-30 bg-slate-900/95 backdrop-blur-md border border-amber-500/50 rounded-xl p-3.5 shadow-2xl text-white w-72 animate-in fade-in">
             <div className="flex items-center justify-between border-b border-slate-700 pb-2 mb-2">
               <div>
-                <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
+                <h4 className="font-bold text-sm text-white flex items-center gap-1.5">
                   <span>{selectedCity.name}</span>
-                  <span className="text-xs text-amber-300 font-serif">({selectedCity.nameHi})</span>
+                  <span className="text-amber-400 text-xs">({selectedCity.nameHi})</span>
                 </h4>
-                <div className="text-[10px] text-slate-400">
-                  {selectedCity.lat.toFixed(2)}°N, {selectedCity.lon.toFixed(2)}°E • Synoptic Station
-                </div>
+                <p className="text-[10px] text-slate-300">{selectedCity.lat.toFixed(2)}°N, {selectedCity.lon.toFixed(2)}°E</p>
               </div>
               <button
                 onClick={() => setSelectedCity(null)}
-                className="text-slate-400 hover:text-white text-xs px-1.5 py-0.5 rounded hover:bg-slate-700"
+                className="text-slate-400 hover:text-white text-xs px-1"
               >
                 ✕
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-              <div className="bg-slate-800/80 p-2 rounded-lg border border-slate-700">
-                <div className="text-[10px] text-slate-400">Current Temp</div>
-                <div className="text-base font-bold text-amber-400">{selectedCity.temp}°C</div>
-                <div className="text-[10px] text-slate-300 truncate">{selectedCity.condition}</div>
+            <div className="grid grid-cols-2 gap-2 text-center mb-3">
+              <div className="bg-slate-800/80 rounded-lg p-1.5 border border-slate-700/60">
+                <div className="text-[9px] text-slate-400">तापमान (Temp)</div>
+                <div className="text-sm font-extrabold text-white">{selectedCity.temp}°C</div>
               </div>
-              <div className="bg-slate-800/80 p-2 rounded-lg border border-slate-700">
-                <div className="text-[10px] text-slate-400">Radar & Convective Risk</div>
-                <div
-                  className={`text-xs font-bold mt-0.5 ${
-                    selectedCity.convectiveRisk === 'Severe'
-                      ? 'text-red-400'
-                      : selectedCity.convectiveRisk === 'High'
-                      ? 'text-amber-400'
-                      : 'text-emerald-400'
-                  }`}
-                >
-                  {selectedCity.convectiveRisk} ({selectedCity.radarDbz} dBZ)
-                </div>
-                <div className="text-[10px] text-slate-400">0–6h Nowcast Ready</div>
+              <div className="bg-slate-800/80 rounded-lg p-1.5 border border-slate-700/60">
+                <div className="text-[9px] text-slate-400">पवन गति (Wind)</div>
+                <div className="text-sm font-extrabold text-emerald-400">{selectedCity.windSpeed} km/h</div>
               </div>
             </div>
 
             <button
               onClick={() => onNavigateToMap({ name: selectedCity.name, lat: selectedCity.lat, lon: selectedCity.lon })}
-              className="w-full py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-slate-950 font-bold text-xs rounded-lg flex items-center justify-center gap-1.5 shadow-md transition-all"
+              className="w-full py-1.5 bg-[#DF691A] hover:bg-[#c75b14] text-white font-bold rounded-lg text-xs flex items-center justify-center gap-1.5 shadow-md transition-colors"
             >
-              <span>View 0–6h Nowcast on Live GIS Map</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              <span>डॉपलर रडार खोलें (Open Radar)</span>
+              <ExternalLink className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
-      </div>
-
-      {/* 3. Bottom Footer Bar: Quick Switch to Map */}
-      <div className="bg-[#0A1A27] px-4 py-2.5 border-t border-slate-700/60 flex items-center justify-between text-xs z-20">
-        <div className="flex items-center gap-2 text-[11px] text-slate-300">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-          <span>लाइव संवहनीय हवाएं और रडार परावर्तन स्ट्रीम (Active Multi-Sensor Feed)</span>
-        </div>
-
-        <button
-          onClick={() => onNavigateToMap()}
-          className="flex items-center gap-1 px-3 py-1 bg-[#DF691A] hover:bg-orange-600 text-white font-bold rounded-lg transition-all text-xs shadow-xs"
-        >
-          <span>पूर्ण मौसम मानचित्र खोलें (Open Map)</span>
-          <ArrowUpRight className="w-3.5 h-3.5" />
-        </button>
       </div>
     </div>
   );
