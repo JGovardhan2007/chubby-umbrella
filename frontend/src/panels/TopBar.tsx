@@ -82,8 +82,12 @@ export const TopBar: React.FC<TopBarProps> = ({
     <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between z-30 select-none shadow-xs">
       {/* 1. Left: Weather Intelligence Header */}
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-amber-50 border border-amber-300 flex items-center justify-center shadow-xs">
-          <CloudLightning className="w-4 h-4 text-amber-500" />
+        <div className="w-9 h-9 rounded-xl overflow-hidden border border-slate-200 shadow-sm flex items-center justify-center shrink-0 bg-slate-900">
+          <img
+            src="/favicon.png"
+            alt="Convective Nowcast Logo"
+            className="w-full h-full object-cover scale-105"
+          />
         </div>
         <div className="flex flex-col">
           <span className="text-base font-bold tracking-tight text-slate-900 font-sans leading-none">

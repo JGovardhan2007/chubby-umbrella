@@ -132,13 +132,13 @@ export const MapView: React.FC<MapViewProps> = ({
     {
       id: 'positron' as const,
       name: 'Default',
-      desc: 'Clean vector streets',
-      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+      desc: 'Clean vector streets & districts',
+      style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json'
     },
     {
       id: 'satellite' as const,
       name: 'Satellite',
-      desc: 'High-res earth imagery',
+      desc: 'High-res earth imagery with labels',
       style: {
         version: 8,
         sources: {
@@ -149,6 +149,20 @@ export const MapView: React.FC<MapViewProps> = ({
             ],
             tileSize: 256,
             attribution: 'Esri, Maxar'
+          },
+          'esri-transportation': {
+            type: 'raster',
+            tiles: [
+              'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}'
+            ],
+            tileSize: 256
+          },
+          'esri-labels': {
+            type: 'raster',
+            tiles: [
+              'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'
+            ],
+            tileSize: 256
           }
         },
         layers: [
@@ -158,6 +172,20 @@ export const MapView: React.FC<MapViewProps> = ({
             source: 'esri-imagery',
             minzoom: 0,
             maxzoom: 19
+          },
+          {
+            id: 'esri-transportation-layer',
+            type: 'raster',
+            source: 'esri-transportation',
+            minzoom: 0,
+            maxzoom: 19
+          },
+          {
+            id: 'esri-labels-layer',
+            type: 'raster',
+            source: 'esri-labels',
+            minzoom: 0,
+            maxzoom: 19
           }
         ]
       }
@@ -165,7 +193,7 @@ export const MapView: React.FC<MapViewProps> = ({
     {
       id: 'voyager' as const,
       name: 'Terrain',
-      desc: 'Topography & relief',
+      desc: 'Topography, relief & boundaries',
       style: {
         version: 8,
         sources: {
@@ -176,6 +204,13 @@ export const MapView: React.FC<MapViewProps> = ({
             ],
             tileSize: 256,
             attribution: 'Esri, USGS'
+          },
+          'esri-topo-labels': {
+            type: 'raster',
+            tiles: [
+              'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'
+            ],
+            tileSize: 256
           }
         },
         layers: [
@@ -183,6 +218,13 @@ export const MapView: React.FC<MapViewProps> = ({
             id: 'esri-topo-layer',
             type: 'raster',
             source: 'esri-topo',
+            minzoom: 0,
+            maxzoom: 19
+          },
+          {
+            id: 'esri-topo-labels-layer',
+            type: 'raster',
+            source: 'esri-topo-labels',
             minzoom: 0,
             maxzoom: 19
           }
