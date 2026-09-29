@@ -293,8 +293,8 @@ export const MapView: React.FC<MapViewProps> = ({
       <DraggableWidget
         id="convective-cells-widget"
         title="Convective Cells"
-        defaultPosition={{ x: 24, y: 70 }}
-        defaultWidth={260}
+        defaultPosition={{ x: 20, y: 55 }}
+        defaultWidth={250}
         minWidth={220}
         maxWidth={460}
         collapsible={true}

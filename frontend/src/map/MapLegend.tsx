@@ -6,11 +6,12 @@ export const MapLegend: React.FC = () => {
     <DraggableWidget
       id="map-legend"
       title="Radar & Intensity Scale"
-      defaultPosition={{ x: 24, y: 380 }}
-      defaultWidth={260}
+      defaultPosition={{ x: 290, y: 55 }}
+      defaultWidth={250}
       minWidth={220}
       maxWidth={420}
       collapsible={true}
+      isCollapsedDefault={false}
     >
       <div className="text-[11px] font-sans text-slate-700 select-none">
         {/* Radar Reflectivity Scale */}
