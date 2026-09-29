@@ -193,106 +193,93 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
     if (!ctx) return;
 
     let animId: number;
-    let width = (canvas.width = canvas.parentElement?.clientWidth || 700);
-    let height = (canvas.height = canvas.parentElement?.clientHeight || 600);
 
-    const handleResize = () => {
-      if (canvas && canvas.parentElement) {
-        width = canvas.width = canvas.parentElement.clientWidth;
-        height = canvas.height = canvas.parentElement.clientHeight;
-      }
-    };
-    window.addEventListener('resize', handleResize);
-
-    // Zoom-Calibrated Meteorological Streamline Particle Engine
-    const NUM_PARTICLES = 360;
+    // High-Density Global Meteorological Streamline Particles
+    const NUM_PARTICLES = 500;
     interface StreamParticle {
       lon: number;
       lat: number;
       speed: number;
       age: number;
       maxAge: number;
-      history: [number, number][]; // Geographical [lon, lat] history
+      trail: [number, number][]; // Pixel coordinates
     }
 
-    // Mathematical global atmospheric vector field
+    // Smooth continuous global atmospheric wind vector field
     const getWindVector = (lon: number, lat: number) => {
-      let u = 0.55;
-      let v = 0.15;
+      let u = 0.6;
+      let v = 0.2;
 
-      // 1. South-Westerly Monsoon & Somali Jet (Arabian Sea)
-      if (lat >= -5 && lat <= 22 && lon >= 40 && lon <= 78) {
-        const jetFactor = Math.sin(((lat + 5) / 27) * Math.PI);
-        u = 0.95 * jetFactor + 0.3;
-        v = 0.55 * jetFactor + 0.15;
+      // 1. South-Westerly Monsoon Jet across Arabian Sea & Peninsular India (Salem, Chennai, Mumbai, Hyderabad)
+      if (lat >= -5 && lat <= 24 && lon >= 38 && lon <= 82) {
+        const jetY = Math.sin(((lat + 5) / 29) * Math.PI);
+        u = 1.1 * jetY + 0.45;
+        v = 0.6 * jetY + 0.25;
       }
       // 2. Bay of Bengal Cyclonic Depression & Curved Circulation
-      else if (lat >= 8 && lat <= 25 && lon >= 80 && lon <= 96) {
-        const cLon = 88.5;
-        const cLat = 18.0;
-        const dx = (lon - cLon) * 0.16;
-        const dy = (lat - cLat) * 0.16;
-        const dist = Math.sqrt(dx * dx + dy * dy) + 0.2;
-        u = -dy * (0.85 / dist) + 0.35;
-        v = dx * (0.85 / dist) + 0.25;
+      else if (lat >= 8 && lat <= 26 && lon >= 80 && lon <= 100) {
+        const cLon = 89.0;
+        const cLat = 18.5;
+        const dx = (lon - cLon) * 0.15;
+        const dy = (lat - cLat) * 0.15;
+        const dist = Math.sqrt(dx * dx + dy * dy) + 0.15;
+        u = -dy * (0.95 / dist) + 0.4;
+        v = dx * (0.95 / dist) + 0.3;
       }
-      // 3. Subtropical Westerlies across Northern Plains, Himalayas & Tibet
-      else if (lat >= 25 && lat <= 45) {
-        const wave = Math.sin((lon / 180) * Math.PI * 3);
-        u = 1.15 + wave * 0.25;
-        v = -0.15 + wave * 0.15;
+      // 3. Subtropical Westerlies across North India, Himalayas, Tibet & Central Asia
+      else if (lat >= 25 && lat <= 50) {
+        const wave = Math.sin((lon / 180) * Math.PI * 4);
+        u = 1.3 + wave * 0.3;
+        v = -0.15 + wave * 0.2;
       }
-      // 4. Arabian Peninsula Anticyclonic Ridge
-      else if (lat >= 14 && lat <= 32 && lon >= 36 && lon <= 60) {
-        const dx = (lon - 48.0) * 0.12;
-        const dy = (lat - 23.0) * 0.12;
-        u = dy * 0.4 + 0.25;
-        v = -dx * 0.4 - 0.15;
+      // 4. Arabian Peninsula Anticyclonic Circulation
+      else if (lat >= 12 && lat <= 35 && lon >= 32 && lon <= 60) {
+        const dx = (lon - 46.0) * 0.1;
+        const dy = (lat - 24.0) * 0.1;
+        u = dy * 0.5 + 0.3;
+        v = -dx * 0.5 - 0.2;
       }
       // 5. Southern Indian Ocean Southeasterly Trade Winds
       else if (lat < 0) {
-        u = -0.85;
-        v = 0.35;
+        u = -0.9;
+        v = 0.4;
       }
-      // 6. Southeast Asia / Myanmar Monsoon Inflow
-      else if (lon > 96 && lat > 8 && lat < 26) {
-        u = 0.35;
-        v = 0.75;
+      // 6. Southeast Asia / Myanmar Northward Inflow
+      else if (lon > 98 && lat > 5 && lat < 28) {
+        u = 0.4;
+        v = 0.9;
       } else {
-        u = 0.5 + Math.sin((lon + lat) * 0.08) * 0.2;
-        v = 0.1 + Math.cos((lon - lat) * 0.08) * 0.15;
+        u = 0.6 + Math.sin((lon + lat) * 0.1) * 0.25;
+        v = 0.2 + Math.cos((lon - lat) * 0.1) * 0.2;
       }
 
       return { u, v };
     };
 
     const spawnParticle = (): StreamParticle => {
-      const map = mapRef.current;
-      let minLon = 40;
-      let maxLon = 110;
-      let minLat = 0;
-      let maxLat = 45;
+      const currentMap = mapRef.current;
+      let minLon = 60;
+      let maxLon = 95;
+      let minLat = 5;
+      let maxLat = 35;
 
-      if (map) {
+      if (currentMap) {
         try {
-          const bounds = map.getBounds();
-          minLon = bounds.getWest() - 1;
-          maxLon = bounds.getEast() + 1;
-          minLat = bounds.getSouth() - 1;
-          maxLat = bounds.getNorth() + 1;
+          const bounds = currentMap.getBounds();
+          minLon = bounds.getWest() - 2;
+          maxLon = bounds.getEast() + 2;
+          minLat = bounds.getSouth() - 2;
+          maxLat = bounds.getNorth() + 2;
         } catch {}
       }
 
-      const lon = minLon + Math.random() * (maxLon - minLon);
-      const lat = minLat + Math.random() * (maxLat - minLat);
-
       return {
-        lon,
-        lat,
-        speed: 0.8 + Math.random() * 0.4,
+        lon: minLon + Math.random() * (maxLon - minLon),
+        lat: minLat + Math.random() * (maxLat - minLat),
+        speed: 0.85 + Math.random() * 0.35,
         age: 0,
-        maxAge: 35 + Math.random() * 35,
-        history: [[lon, lat]]
+        maxAge: 40 + Math.random() * 45,
+        trail: []
       };
     };
 
@@ -303,78 +290,88 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
       particles.push(p);
     }
 
-    // Reset trails on map pan/zoom
-    const map = mapRef.current;
-    if (map) {
-      map.on('movestart', () => {
-        particles.forEach((p) => {
-          p.history = [[p.lon, p.lat]];
-        });
-      });
-    }
-
     const render = () => {
-      ctx.clearRect(0, 0, width, height);
+      // Ensure canvas dimensions match element display size
+      const cw = canvas.offsetWidth || canvas.clientWidth || 700;
+      const ch = canvas.offsetHeight || canvas.clientHeight || 600;
+
+      if (canvas.width !== cw || canvas.height !== ch) {
+        canvas.width = cw;
+        canvas.height = ch;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (activeTab === 'wind' || activeTab === 'cyclone') {
         const currentMap = mapRef.current;
         const zoom = currentMap ? currentMap.getZoom() : 4.2;
 
-        // Scale geographic delta inversely with zoom level to maintain consistent pixel streak length
-        const zoomFactor = Math.pow(2, Math.max(0, zoom - 4.2));
-        const baseStepDeg = 0.007 / zoomFactor;
+        // Step size calibrated to screen scale
+        const zoomScale = Math.pow(1.85, Math.max(0, zoom - 4.2));
+        const baseStepDeg = 0.007 / zoomScale;
 
         for (let i = 0; i < particles.length; i++) {
           const p = particles[i];
           const { u, v } = getWindVector(p.lon, p.lat);
 
-          // Advance geographic coordinates
+          // Advance geographical position
           p.lon += u * baseStepDeg * p.speed;
           p.lat += v * baseStepDeg * p.speed;
           p.age += 1;
 
-          p.history.push([p.lon, p.lat]);
-          if (p.history.length > 5) {
-            p.history.shift();
+          // Project to screen coordinates
+          let px = 0;
+          let py = 0;
+
+          if (currentMap) {
+            try {
+              const pos = currentMap.project([p.lon, p.lat]);
+              px = pos.x;
+              py = pos.y;
+            } catch {
+              px = (p.lon - 60) * (cw / 35);
+              py = (35 - p.lat) * (ch / 30);
+            }
+          } else {
+            px = (p.lon - 60) * (cw / 35);
+            py = (35 - p.lat) * (ch / 30);
           }
 
-          if (p.age >= p.maxAge) {
+          p.trail.push([px, py]);
+          if (p.trail.length > 7) {
+            p.trail.shift();
+          }
+
+          if (
+            p.age >= p.maxAge ||
+            px < -50 ||
+            px > cw + 50 ||
+            py < -50 ||
+            py > ch + 50
+          ) {
             particles[i] = spawnParticle();
             continue;
           }
 
-          if (currentMap && p.history.length >= 2) {
-            try {
-              const pts = p.history.map(([lon, lat]) => currentMap.project([lon, lat]));
-              const head = pts[pts.length - 1];
+          if (p.trail.length >= 2) {
+            const lifeProgress = p.age / p.maxAge;
+            const alpha = Math.sin(lifeProgress * Math.PI) * 0.92;
 
-              // Check if head is outside viewport
-              if (head.x < -30 || head.x > width + 30 || head.y < -30 || head.y > height + 30) {
-                particles[i] = spawnParticle();
-                continue;
-              }
-
-              const lifeProgress = p.age / p.maxAge;
-              const alpha = Math.sin(lifeProgress * Math.PI) * 0.85;
-
-              ctx.beginPath();
-              ctx.moveTo(pts[0].x, pts[0].y);
-              for (let j = 1; j < pts.length; j++) {
-                ctx.lineTo(pts[j].x, pts[j].y);
-              }
-
-              // Authentic soft green atmospheric breeze stream
-              ctx.strokeStyle =
-                activeTab === 'cyclone'
-                  ? `rgba(251, 146, 60, ${alpha * 0.8})`
-                  : `rgba(34, 197, 94, ${alpha * 0.9})`;
-              ctx.lineWidth = 1.1;
-              ctx.lineCap = 'round';
-              ctx.lineJoin = 'round';
-              ctx.stroke();
-            } catch {
-              particles[i] = spawnParticle();
+            ctx.beginPath();
+            ctx.moveTo(p.trail[0][0], p.trail[0][1]);
+            for (let j = 1; j < p.trail.length; j++) {
+              ctx.lineTo(p.trail[j][0], p.trail[j][1]);
             }
+
+            // Glowing vibrant neon green streamline stroke
+            ctx.strokeStyle =
+              activeTab === 'cyclone'
+                ? `rgba(249, 115, 22, ${alpha * 0.85})`
+                : `rgba(34, 197, 94, ${alpha})`;
+            ctx.lineWidth = 1.25;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
           }
         }
       }
@@ -386,7 +383,6 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
 
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener('resize', handleResize);
     };
   }, [activeTab, isMapReady]);
 
