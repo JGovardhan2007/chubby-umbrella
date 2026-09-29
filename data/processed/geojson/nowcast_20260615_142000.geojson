@@ -1,0 +1,1258 @@
+{
+  "type": "FeatureCollection",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            79.6362,
+            13.085
+          ],
+          [
+            79.6896,
+            13.1193
+          ],
+          [
+            79.7964,
+            13.1878
+          ],
+          [
+            80.01,
+            13.3247
+          ],
+          [
+            80.2236,
+            13.4617
+          ],
+          [
+            80.4372,
+            13.5987
+          ],
+          [
+            80.6508,
+            13.7357
+          ],
+          [
+            80.8644,
+            13.8726
+          ]
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "feature_type": "predicted_storm_track",
+        "horizons_minutes": [
+          15,
+          30,
+          60,
+          120,
+          180,
+          240,
+          300,
+          360
+        ]
+      },
+      "id": "STM_260615_001_track"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.6362,
+          13.085
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "lead_time_minutes": 15,
+        "valid_time": "2026-06-15T14:35:00",
+        "predicted_lat": 13.085,
+        "predicted_lon": 79.6362,
+        "predicted_area_km2": 695.43,
+        "predicted_intensity_dbz": 48.66,
+        "confidence": 0.566,
+        "uncertainty_radius_km": 6.5,
+        "status": "PREDICTED",
+        "hazard_probabilities": {
+          "lightning": 0.482,
+          "hail": 0.431,
+          "downburst": 0.639,
+          "cloudburst": 0.587
+        },
+        "feature_type": "predicted_storm_centroid"
+      },
+      "id": "STM_260615_001_15m"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              79.6362,
+              13.1436
+            ],
+            [
+              79.6517,
+              13.1416
+            ],
+            [
+              79.6662,
+              13.1358
+            ],
+            [
+              79.6787,
+              13.1265
+            ],
+            [
+              79.6882,
+              13.1143
+            ],
+            [
+              79.6942,
+              13.1002
+            ],
+            [
+              79.6963,
+              13.085
+            ],
+            [
+              79.6942,
+              13.0699
+            ],
+            [
+              79.6882,
+              13.0558
+            ],
+            [
+              79.6787,
+              13.0436
+            ],
+            [
+              79.6662,
+              13.0343
+            ],
+            [
+              79.6517,
+              13.0285
+            ],
+            [
+              79.6362,
+              13.0265
+            ],
+            [
+              79.6206,
+              13.0285
+            ],
+            [
+              79.6061,
+              13.0343
+            ],
+            [
+              79.5936,
+              13.0436
+            ],
+            [
+              79.5841,
+              13.0558
+            ],
+            [
+              79.5781,
+              13.0699
+            ],
+            [
+              79.576,
+              13.085
+            ],
+            [
+              79.5781,
+              13.1002
+            ],
+            [
+              79.5841,
+              13.1143
+            ],
+            [
+              79.5936,
+              13.1265
+            ],
+            [
+              79.6061,
+              13.1358
+            ],
+            [
+              79.6206,
+              13.1416
+            ],
+            [
+              79.6362,
+              13.1436
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "lead_time_minutes": 15,
+        "uncertainty_radius_km": 6.5,
+        "confidence": 0.5658141522513108,
+        "status": "PREDICTED",
+        "feature_type": "uncertainty_cone"
+      },
+      "id": "STM_260615_001_15m_cone"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.6896,
+          13.1193
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "lead_time_minutes": 30,
+        "valid_time": "2026-06-15T14:50:00",
+        "predicted_lat": 13.1193,
+        "predicted_lon": 79.6896,
+        "predicted_area_km2": 742.19,
+        "predicted_intensity_dbz": 48.54,
+        "confidence": 0.549,
+        "uncertainty_radius_km": 8.0,
+        "status": "PREDICTED",
+        "hazard_probabilities": {
+          "lightning": 0.468,
+          "hail": 0.418,
+          "downburst": 0.62,
+          "cloudburst": 0.57
+        },
+        "feature_type": "predicted_storm_centroid"
+      },
+      "id": "STM_260615_001_30m"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              79.6896,
+              13.1914
+            ],
+            [
+              79.7087,
+              13.1889
+            ],
+            [
+              79.7266,
+              13.1817
+            ],
+            [
+              79.7419,
+              13.1702
+            ],
+            [
+              79.7536,
+              13.1553
+            ],
+            [
+              79.761,
+              13.1379
+            ],
+            [
+              79.7636,
+              13.1193
+            ],
+            [
+              79.761,
+              13.1006
+            ],
+            [
+              79.7536,
+              13.0833
+            ],
+            [
+              79.7419,
+              13.0683
+            ],
+            [
+              79.7266,
+              13.0569
+            ],
+            [
+              79.7087,
+              13.0497
+            ],
+            [
+              79.6896,
+              13.0472
+            ],
+            [
+              79.6704,
+              13.0497
+            ],
+            [
+              79.6526,
+              13.0569
+            ],
+            [
+              79.6372,
+              13.0683
+            ],
+            [
+              79.6255,
+              13.0833
+            ],
+            [
+              79.6181,
+              13.1006
+            ],
+            [
+              79.6155,
+              13.1193
+            ],
+            [
+              79.6181,
+              13.1379
+            ],
+            [
+              79.6255,
+              13.1553
+            ],
+            [
+              79.6372,
+              13.1702
+            ],
+            [
+              79.6526,
+              13.1817
+            ],
+            [
+              79.6704,
+              13.1889
+            ],
+            [
+              79.6896,
+              13.1914
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "lead_time_minutes": 30,
+        "uncertainty_radius_km": 8.0,
+        "confidence": 0.5490918168708201,
+        "status": "PREDICTED",
+        "feature_type": "uncertainty_cone"
+      },
+      "id": "STM_260615_001_30m_cone"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.7964,
+          13.1878
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "lead_time_minutes": 60,
+        "valid_time": "2026-06-15T15:20:00",
+        "predicted_lat": 13.1878,
+        "predicted_lon": 79.7964,
+        "predicted_area_km2": 822.84,
+        "predicted_intensity_dbz": 48.14,
+        "confidence": 0.517,
+        "uncertainty_radius_km": 11.0,
+        "status": "PREDICTED",
+        "hazard_probabilities": {
+          "lightning": 0.441,
+          "hail": 0.394,
+          "downburst": 0.584,
+          "cloudburst": 0.537
+        },
+        "feature_type": "predicted_storm_centroid"
+      },
+      "id": "STM_260615_001_60m"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              79.7964,
+              13.2869
+            ],
+            [
+              79.8227,
+              13.2835
+            ],
+            [
+              79.8472,
+              13.2736
+            ],
+            [
+              79.8683,
+              13.2578
+            ],
+            [
+              79.8845,
+              13.2373
+            ],
+            [
+              79.8947,
+              13.2134
+            ],
+            [
+              79.8981,
+              13.1878
+            ],
+            [
+              79.8947,
+              13.1621
+            ],
+            [
+              79.8845,
+              13.1382
+            ],
+            [
+              79.8683,
+              13.1177
+            ],
+            [
+              79.8472,
+              13.102
+            ],
+            [
+              79.8227,
+              13.0921
+            ],
+            [
+              79.7964,
+              13.0887
+            ],
+            [
+              79.77,
+              13.0921
+            ],
+            [
+              79.7455,
+              13.102
+            ],
+            [
+              79.7244,
+              13.1177
+            ],
+            [
+              79.7082,
+              13.1382
+            ],
+            [
+              79.698,
+              13.1621
+            ],
+            [
+              79.6946,
+              13.1878
+            ],
+            [
+              79.698,
+              13.2134
+            ],
+            [
+              79.7082,
+              13.2373
+            ],
+            [
+              79.7244,
+              13.2578
+            ],
+            [
+              79.7455,
+              13.2736
+            ],
+            [
+              79.77,
+              13.2835
+            ],
+            [
+              79.7964,
+              13.2869
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "lead_time_minutes": 60,
+        "uncertainty_radius_km": 11.0,
+        "confidence": 0.5171151988102756,
+        "status": "PREDICTED",
+        "feature_type": "uncertainty_cone"
+      },
+      "id": "STM_260615_001_60m_cone"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.01,
+          13.3247
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "lead_time_minutes": 120,
+        "valid_time": "2026-06-15T16:20:00",
+        "predicted_lat": 13.3247,
+        "predicted_lon": 80.01,
+        "predicted_area_km2": 939.36,
+        "predicted_intensity_dbz": 46.78,
+        "confidence": 0.459,
+        "uncertainty_radius_km": 17.0,
+        "status": "DERIVED",
+        "hazard_probabilities": {
+          "lightning": 0.391,
+          "hail": 0.349,
+          "downburst": 0.518,
+          "cloudburst": 0.476
+        },
+        "feature_type": "predicted_storm_centroid"
+      },
+      "id": "STM_260615_001_120m"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              80.01,
+              13.4779
+            ],
+            [
+              80.0507,
+              13.4727
+            ],
+            [
+              80.0887,
+              13.4574
+            ],
+            [
+              80.1213,
+              13.433
+            ],
+            [
+              80.1463,
+              13.4013
+            ],
+            [
+              80.162,
+              13.3644
+            ],
+            [
+              80.1674,
+              13.3247
+            ],
+            [
+              80.162,
+              13.2851
+            ],
+            [
+              80.1463,
+              13.2482
+            ],
+            [
+              80.1213,
+              13.2165
+            ],
+            [
+              80.0887,
+              13.1921
+            ],
+            [
+              80.0507,
+              13.1768
+            ],
+            [
+              80.01,
+              13.1716
+            ],
+            [
+              79.9692,
+              13.1768
+            ],
+            [
+              79.9313,
+              13.1921
+            ],
+            [
+              79.8987,
+              13.2165
+            ],
+            [
+              79.8737,
+              13.2482
+            ],
+            [
+              79.8579,
+              13.2851
+            ],
+            [
+              79.8526,
+              13.3247
+            ],
+            [
+              79.8579,
+              13.3644
+            ],
+            [
+              79.8737,
+              13.4013
+            ],
+            [
+              79.8987,
+              13.433
+            ],
+            [
+              79.9313,
+              13.4574
+            ],
+            [
+              79.9692,
+              13.4727
+            ],
+            [
+              80.01,
+              13.4779
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "lead_time_minutes": 120,
+        "uncertainty_radius_km": 17.0,
+        "confidence": 0.4586400379618894,
+        "status": "DERIVED",
+        "feature_type": "uncertainty_cone"
+      },
+      "id": "STM_260615_001_120m_cone"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.2236,
+          13.4617
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "lead_time_minutes": 180,
+        "valid_time": "2026-06-15T17:20:00",
+        "predicted_lat": 13.4617,
+        "predicted_lon": 80.2236,
+        "predicted_area_km2": 1007.45,
+        "predicted_intensity_dbz": 44.86,
+        "confidence": 0.407,
+        "uncertainty_radius_km": 23.0,
+        "status": "DERIVED",
+        "hazard_probabilities": {
+          "lightning": 0.347,
+          "hail": 0.31,
+          "downburst": 0.46,
+          "cloudburst": 0.422
+        },
+        "feature_type": "predicted_storm_centroid"
+      },
+      "id": "STM_260615_001_180m"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              80.2236,
+              13.6689
+            ],
+            [
+              80.2787,
+              13.6619
+            ],
+            [
+              80.3301,
+              13.6412
+            ],
+            [
+              80.3742,
+              13.6082
+            ],
+            [
+              80.4081,
+              13.5653
+            ],
+            [
+              80.4294,
+              13.5154
+            ],
+            [
+              80.4366,
+              13.4617
+            ],
+            [
+              80.4294,
+              13.4081
+            ],
+            [
+              80.4081,
+              13.3581
+            ],
+            [
+              80.3742,
+              13.3152
+            ],
+            [
+              80.3301,
+              13.2823
+            ],
+            [
+              80.2787,
+              13.2616
+            ],
+            [
+              80.2236,
+              13.2545
+            ],
+            [
+              80.1684,
+              13.2616
+            ],
+            [
+              80.117,
+              13.2823
+            ],
+            [
+              80.0729,
+              13.3152
+            ],
+            [
+              80.0391,
+              13.3581
+            ],
+            [
+              80.0178,
+              13.4081
+            ],
+            [
+              80.0105,
+              13.4617
+            ],
+            [
+              80.0178,
+              13.5154
+            ],
+            [
+              80.0391,
+              13.5653
+            ],
+            [
+              80.0729,
+              13.6082
+            ],
+            [
+              80.117,
+              13.6412
+            ],
+            [
+              80.1684,
+              13.6619
+            ],
+            [
+              80.2236,
+              13.6689
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "lead_time_minutes": 180,
+        "uncertainty_radius_km": 23.0,
+        "confidence": 0.4067772227651326,
+        "status": "DERIVED",
+        "feature_type": "uncertainty_cone"
+      },
+      "id": "STM_260615_001_180m_cone"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.4372,
+          13.5987
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "lead_time_minutes": 240,
+        "valid_time": "2026-06-15T18:20:00",
+        "predicted_lat": 13.5987,
+        "predicted_lon": 80.4372,
+        "predicted_area_km2": 1038.35,
+        "predicted_intensity_dbz": 42.57,
+        "confidence": 0.361,
+        "uncertainty_radius_km": 29.0,
+        "status": "UNCERTAIN",
+        "hazard_probabilities": {
+          "lightning": 0.307,
+          "hail": 0.275,
+          "downburst": 0.408,
+          "cloudburst": 0.375
+        },
+        "feature_type": "predicted_storm_centroid"
+      },
+      "id": "STM_260615_001_240m"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              80.4372,
+              13.86
+            ],
+            [
+              80.5067,
+              13.8511
+            ],
+            [
+              80.5716,
+              13.825
+            ],
+            [
+              80.6272,
+              13.7834
+            ],
+            [
+              80.67,
+              13.7293
+            ],
+            [
+              80.6968,
+              13.6663
+            ],
+            [
+              80.706,
+              13.5987
+            ],
+            [
+              80.6968,
+              13.5311
+            ],
+            [
+              80.67,
+              13.4681
+            ],
+            [
+              80.6272,
+              13.414
+            ],
+            [
+              80.5716,
+              13.3724
+            ],
+            [
+              80.5067,
+              13.3463
+            ],
+            [
+              80.4372,
+              13.3374
+            ],
+            [
+              80.3676,
+              13.3463
+            ],
+            [
+              80.3028,
+              13.3724
+            ],
+            [
+              80.2471,
+              13.414
+            ],
+            [
+              80.2044,
+              13.4681
+            ],
+            [
+              80.1775,
+              13.5311
+            ],
+            [
+              80.1684,
+              13.5987
+            ],
+            [
+              80.1775,
+              13.6663
+            ],
+            [
+              80.2044,
+              13.7293
+            ],
+            [
+              80.2471,
+              13.7834
+            ],
+            [
+              80.3028,
+              13.825
+            ],
+            [
+              80.3676,
+              13.8511
+            ],
+            [
+              80.4372,
+              13.86
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "lead_time_minutes": 240,
+        "uncertainty_radius_km": 29.0,
+        "confidence": 0.3607790320614439,
+        "status": "UNCERTAIN",
+        "feature_type": "uncertainty_cone"
+      },
+      "id": "STM_260615_001_240m_cone"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.6508,
+          13.7357
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "lead_time_minutes": 300,
+        "valid_time": "2026-06-15T19:20:00",
+        "predicted_lat": 13.7357,
+        "predicted_lon": 80.6508,
+        "predicted_area_km2": 1041.1,
+        "predicted_intensity_dbz": 40.05,
+        "confidence": 0.32,
+        "uncertainty_radius_km": 35.0,
+        "status": "UNCERTAIN",
+        "hazard_probabilities": {
+          "lightning": 0.273,
+          "hail": 0.244,
+          "downburst": 0.362,
+          "cloudburst": 0.332
+        },
+        "feature_type": "predicted_storm_centroid"
+      },
+      "id": "STM_260615_001_300m"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              80.6508,
+              14.051
+            ],
+            [
+              80.7348,
+              14.0402
+            ],
+            [
+              80.8131,
+              14.0087
+            ],
+            [
+              80.8803,
+              13.9586
+            ],
+            [
+              80.9319,
+              13.8933
+            ],
+            [
+              80.9643,
+              13.8173
+            ],
+            [
+              80.9754,
+              13.7357
+            ],
+            [
+              80.9643,
+              13.6541
+            ],
+            [
+              80.9319,
+              13.578
+            ],
+            [
+              80.8803,
+              13.5127
+            ],
+            [
+              80.8131,
+              13.4626
+            ],
+            [
+              80.7348,
+              13.4311
+            ],
+            [
+              80.6508,
+              13.4204
+            ],
+            [
+              80.5668,
+              13.4311
+            ],
+            [
+              80.4885,
+              13.4626
+            ],
+            [
+              80.4213,
+              13.5127
+            ],
+            [
+              80.3697,
+              13.578
+            ],
+            [
+              80.3373,
+              13.6541
+            ],
+            [
+              80.3262,
+              13.7357
+            ],
+            [
+              80.3373,
+              13.8173
+            ],
+            [
+              80.3697,
+              13.8933
+            ],
+            [
+              80.4213,
+              13.9586
+            ],
+            [
+              80.4885,
+              14.0087
+            ],
+            [
+              80.5668,
+              14.0402
+            ],
+            [
+              80.6508,
+              14.051
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "lead_time_minutes": 300,
+        "uncertainty_radius_km": 35.0,
+        "confidence": 0.31998229667432926,
+        "status": "UNCERTAIN",
+        "feature_type": "uncertainty_cone"
+      },
+      "id": "STM_260615_001_300m_cone"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.8644,
+          13.8726
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "lead_time_minutes": 360,
+        "valid_time": "2026-06-15T20:20:00",
+        "predicted_lat": 13.8726,
+        "predicted_lon": 80.8644,
+        "predicted_area_km2": 1022.93,
+        "predicted_intensity_dbz": 37.41,
+        "confidence": 0.284,
+        "uncertainty_radius_km": 41.0,
+        "status": "UNCERTAIN",
+        "hazard_probabilities": {
+          "lightning": 0.242,
+          "hail": 0.216,
+          "downburst": 0.321,
+          "cloudburst": 0.295
+        },
+        "feature_type": "predicted_storm_centroid"
+      },
+      "id": "STM_260615_001_360m"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              80.8644,
+              14.242
+            ],
+            [
+              80.9629,
+              14.2294
+            ],
+            [
+              81.0546,
+              14.1925
+            ],
+            [
+              81.1334,
+              14.1338
+            ],
+            [
+              81.1939,
+              14.0573
+            ],
+            [
+              81.2319,
+              13.9682
+            ],
+            [
+              81.2449,
+              13.8726
+            ],
+            [
+              81.2319,
+              13.777
+            ],
+            [
+              81.1939,
+              13.688
+            ],
+            [
+              81.1334,
+              13.6115
+            ],
+            [
+              81.0546,
+              13.5528
+            ],
+            [
+              80.9629,
+              13.5159
+            ],
+            [
+              80.8644,
+              13.5033
+            ],
+            [
+              80.7659,
+              13.5159
+            ],
+            [
+              80.6742,
+              13.5528
+            ],
+            [
+              80.5954,
+              13.6115
+            ],
+            [
+              80.5349,
+              13.688
+            ],
+            [
+              80.4969,
+              13.777
+            ],
+            [
+              80.4839,
+              13.8726
+            ],
+            [
+              80.4969,
+              13.9682
+            ],
+            [
+              80.5349,
+              14.0573
+            ],
+            [
+              80.5954,
+              14.1338
+            ],
+            [
+              80.6742,
+              14.1925
+            ],
+            [
+              80.7659,
+              14.2294
+            ],
+            [
+              80.8644,
+              14.242
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "lead_time_minutes": 360,
+        "uncertainty_radius_km": 41.0,
+        "confidence": 0.2837988383081551,
+        "status": "UNCERTAIN",
+        "feature_type": "uncertainty_cone"
+      },
+      "id": "STM_260615_001_360m_cone"
+    }
+  ]
+}

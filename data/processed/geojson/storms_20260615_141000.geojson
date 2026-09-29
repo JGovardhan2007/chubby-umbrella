@@ -1,0 +1,135 @@
+{
+  "type": "FeatureCollection",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          79.5401,
+          13.0264
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "timestamp": "2026-06-15T14:10:00",
+        "centroid_lat": 13.0264,
+        "centroid_lon": 79.5401,
+        "area_km2": 540.0,
+        "intensity": 44.71,
+        "confidence": 0.481,
+        "speed_kmh": 19.68,
+        "heading_deg": 47.7,
+        "velocity_u_kmh": 14.57,
+        "velocity_v_kmh": 13.24,
+        "growth_rate_km2_hr": 2424.0,
+        "intensity_trend_dbz_hr": 25.15,
+        "lightning_trend": -0.01,
+        "convective_stage": "INTENSIFYING",
+        "indicators": {
+          "max_dbz": 44.71,
+          "mean_dbz": 33.76,
+          "min_bt_k": 243.75,
+          "max_cooling_k_15min": -24.48,
+          "max_growth_dbz_15min": 26.19,
+          "max_lightning_density": 0.06
+        },
+        "history_points": 2,
+        "hazards": {
+          "lightning": 0.3662682939668496,
+          "hail": 0.1445792447603666,
+          "downburst": 0.37164607083909823,
+          "cloudburst": 0.38886931834410765
+        },
+        "feature_type": "storm_centroid"
+      },
+      "id": "STM_260615_001_centroid"
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              79.5039,
+              12.918
+            ],
+            [
+              79.4319,
+              12.99
+            ],
+            [
+              79.4319,
+              13.08
+            ],
+            [
+              79.5039,
+              13.134
+            ],
+            [
+              79.5759,
+              13.134
+            ],
+            [
+              79.6299,
+              13.098
+            ],
+            [
+              79.6479,
+              12.972
+            ],
+            [
+              79.6119,
+              12.936
+            ],
+            [
+              79.5039,
+              12.918
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "storm_id": "STM_260615_001",
+        "timestamp": "2026-06-15T14:10:00",
+        "centroid_lat": 13.0264,
+        "centroid_lon": 79.5401,
+        "area_km2": 540.0,
+        "intensity": 44.71,
+        "confidence": 0.481,
+        "speed_kmh": 19.68,
+        "heading_deg": 47.7,
+        "velocity_u_kmh": 14.57,
+        "velocity_v_kmh": 13.24,
+        "growth_rate_km2_hr": 2424.0,
+        "intensity_trend_dbz_hr": 25.15,
+        "lightning_trend": -0.01,
+        "convective_stage": "INTENSIFYING",
+        "indicators": {
+          "max_dbz": 44.71,
+          "mean_dbz": 33.76,
+          "min_bt_k": 243.75,
+          "max_cooling_k_15min": -24.48,
+          "max_growth_dbz_15min": 26.19,
+          "max_lightning_density": 0.06
+        },
+        "history_points": 2,
+        "hazards": {
+          "lightning": 0.3662682939668496,
+          "hail": 0.1445792447603666,
+          "downburst": 0.37164607083909823,
+          "cloudburst": 0.38886931834410765
+        },
+        "feature_type": "storm_boundary"
+      },
+      "id": "STM_260615_001_boundary"
+    }
+  ]
+}

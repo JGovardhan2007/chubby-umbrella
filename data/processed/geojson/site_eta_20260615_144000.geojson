@@ -1,0 +1,40 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          80.2707,
+          13.0827
+        ]
+      },
+      "properties": {
+        "target_location": {
+          "latitude": 13.0827,
+          "longitude": 80.2707,
+          "label": "Chennai_City"
+        },
+        "timestamp": "2026-06-15T14:40:00",
+        "nearest_storm_id": "STM_260615_001",
+        "distance_km": 65.37,
+        "storm_heading_deg": 59.0,
+        "storm_speed_kmh": 30.0,
+        "is_approaching": true,
+        "estimated_arrival_minutes": 155.5,
+        "estimated_arrival_time": "2026-06-15T17:15:30.611601",
+        "hazard_risks": {
+          "lightning": 0.281,
+          "hail": 0.322,
+          "downburst": 0.26,
+          "cloudburst": 0.277
+        },
+        "confidence": 0.744,
+        "status": "APPROACHING",
+        "feature_type": "site_eta_marker"
+      },
+      "id": "target_site_eta"
+    }
+  ]
+}

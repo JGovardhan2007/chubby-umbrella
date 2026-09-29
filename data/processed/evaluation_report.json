@@ -1,0 +1,81 @@
+{
+  "evaluation_time": "2026-09-29T08:51:14.695778",
+  "total_replayed_steps": 6,
+  "overall_detection_csi": 1.0,
+  "overall_f1_score": 1.0,
+  "mean_arrival_time_mae_min": 5.2,
+  "horizon_breakdown": {
+    "15": {
+      "lead_time_minutes": 15,
+      "contingency": {
+        "hits": 5,
+        "false_alarms": 0,
+        "misses": 0,
+        "correct_negatives": 0,
+        "pod": 1.0,
+        "far": 0.0,
+        "precision": 1.0,
+        "csi_threat_score": 1.0,
+        "f1_score": 1.0,
+        "hss": 0.0
+      },
+      "centroid_distance_mae_km": 2.59,
+      "centroid_distance_rmse_km": 3.0,
+      "hazard_brier_scores": {
+        "lightning": 0.2861,
+        "hail": 0.2213,
+        "downburst": 0.1379,
+        "cloudburst": 0.1529
+      },
+      "sample_count": 5
+    },
+    "30": {
+      "lead_time_minutes": 30,
+      "contingency": {
+        "hits": 3,
+        "false_alarms": 0,
+        "misses": 0,
+        "correct_negatives": 0,
+        "pod": 1.0,
+        "far": 0.0,
+        "precision": 1.0,
+        "csi_threat_score": 1.0,
+        "f1_score": 1.0,
+        "hss": 0.0
+      },
+      "centroid_distance_mae_km": 8.38,
+      "centroid_distance_rmse_km": 10.25,
+      "hazard_brier_scores": {
+        "lightning": 0.4401,
+        "hail": 0.6817,
+        "downburst": 0.4916,
+        "cloudburst": 0.3512
+      },
+      "sample_count": 3
+    },
+    "60": {
+      "lead_time_minutes": 60,
+      "contingency": {
+        "hits": 0,
+        "false_alarms": 0,
+        "misses": 0,
+        "correct_negatives": 0,
+        "pod": 0.0,
+        "far": 0.0,
+        "precision": 1.0,
+        "csi_threat_score": 0.0,
+        "f1_score": 0.0,
+        "hss": 0.0
+      },
+      "centroid_distance_mae_km": 0.0,
+      "centroid_distance_rmse_km": 0.0,
+      "hazard_brier_scores": {
+        "lightning": 0.0,
+        "hail": 0.0,
+        "downburst": 0.0,
+        "cloudburst": 0.0
+      },
+      "sample_count": 0
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-06-15T14:30:00",
+  "stations": [
+    {
+      "lat": 13.0,
+      "lon": 80.2,
+      "temp_c": 32.5,
+      "rh_pct": 78.0,
+      "wind_speed_ms": 12.0,
+      "rain_rate_mm_hr": 38.25
+    },
+    {
+      "lat": 13.5,
+      "lon": 79.8,
+      "temp_c": 28.0,
+      "rh_pct": 88.0,
+      "wind_speed_ms": 18.5,
+      "rain_rate_mm_hr": 68.0
+    }
+  ]
+}

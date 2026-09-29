@@ -1,0 +1,47 @@
+{
+  "manifest": [
+    {
+      "timestamp": "2026-06-15T14:00:00",
+      "radar_path": "data\\sample\\simulated_radar_20260615_140000.nc",
+      "satellite_path": "data\\sample\\simulated_satellite_20260615_140000.nc",
+      "lightning_path": "data\\sample\\simulated_lightning_20260615_140000.csv",
+      "weather_path": "data\\sample\\simulated_weather_20260615_140000.json"
+    },
+    {
+      "timestamp": "2026-06-15T14:10:00",
+      "radar_path": "data\\sample\\simulated_radar_20260615_141000.nc",
+      "satellite_path": "data\\sample\\simulated_satellite_20260615_141000.nc",
+      "lightning_path": "data\\sample\\simulated_lightning_20260615_141000.csv",
+      "weather_path": "data\\sample\\simulated_weather_20260615_141000.json"
+    },
+    {
+      "timestamp": "2026-06-15T14:20:00",
+      "radar_path": "data\\sample\\simulated_radar_20260615_142000.nc",
+      "satellite_path": "data\\sample\\simulated_satellite_20260615_142000.nc",
+      "lightning_path": "data\\sample\\simulated_lightning_20260615_142000.csv",
+      "weather_path": "data\\sample\\simulated_weather_20260615_142000.json"
+    },
+    {
+      "timestamp": "2026-06-15T14:30:00",
+      "radar_path": "data\\sample\\simulated_radar_20260615_143000.nc",
+      "satellite_path": "data\\sample\\simulated_satellite_20260615_143000.nc",
+      "lightning_path": "data\\sample\\simulated_lightning_20260615_143000.csv",
+      "weather_path": "data\\sample\\simulated_weather_20260615_143000.json"
+    },
+    {
+      "timestamp": "2026-06-15T14:40:00",
+      "radar_path": "data\\sample\\simulated_radar_20260615_144000.nc",
+      "satellite_path": "data\\sample\\simulated_satellite_20260615_144000.nc",
+      "lightning_path": "data\\sample\\simulated_lightning_20260615_144000.csv",
+      "weather_path": "data\\sample\\simulated_weather_20260615_144000.json"
+    },
+    {
+      "timestamp": "2026-06-15T14:50:00",
+      "radar_path": "data\\sample\\simulated_radar_20260615_145000.nc",
+      "satellite_path": "data\\sample\\simulated_satellite_20260615_145000.nc",
+      "lightning_path": "data\\sample\\simulated_lightning_20260615_145000.csv",
+      "weather_path": "data\\sample\\simulated_weather_20260615_145000.json"
+    }
+  ],
+  "is_simulated": true
+}
