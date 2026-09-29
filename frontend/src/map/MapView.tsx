@@ -298,6 +298,7 @@ export const MapView: React.FC<MapViewProps> = ({
         minWidth={220}
         maxWidth={460}
         collapsible={true}
+        isCollapsedDefault={true}
       >
         <div className="space-y-2 select-none">
           {/* Active Expanded Card */}
