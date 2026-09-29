@@ -68,6 +68,8 @@ export const RadarLayer: React.FC<RadarLayerProps> = ({
           type: 'raster',
           tiles: [tileUrl],
           tileSize: 256,
+          minzoom: 0,
+          maxzoom: 7,
           attribution: 'RainViewer Live Doppler Radar'
         });
 
@@ -77,6 +79,7 @@ export const RadarLayer: React.FC<RadarLayerProps> = ({
           source: liveRasterSourceId,
           paint: {
             'raster-opacity': 0.85,
+            'raster-resampling': 'linear',
             'raster-fade-duration': 300
           }
         });
