@@ -16,7 +16,7 @@ import { MapLegend } from './MapLegend';
 
 import { MapDetailsDrawer } from './MapDetailsDrawer';
 
-import { formatStormName } from '../utils/formatters';
+import { formatStormName, formatLocationName } from '../utils/formatters';
 
 interface MapViewProps {
   layers: LayerToggleState;
@@ -85,13 +85,14 @@ export const MapView: React.FC<MapViewProps> = ({
     if (siteEta) {
       const { latitude, longitude, label } = siteEta.target_location;
 
+      const cleanLabel = formatLocationName(label);
       const markerHtml = `
         <div class="relative flex items-center justify-center cursor-pointer group">
           <div class="w-5 h-5 rounded-full bg-amber-500 border-2 border-white shadow-md flex items-center justify-center text-white">
             <span class="w-2 h-2 rounded-full bg-white"></span>
           </div>
           <div class="absolute -bottom-6 bg-slate-900 text-white text-[10px] font-sans font-semibold px-2.5 py-0.5 rounded shadow-md whitespace-nowrap border border-slate-700">
-            ${label}
+            ${cleanLabel}
           </div>
         </div>
       `;

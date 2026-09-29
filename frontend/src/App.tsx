@@ -72,7 +72,7 @@ export const App: React.FC = () => {
   // Fetch frame data whenever step or horizon changes
   const loadData = useCallback(async () => {
     if (mode === 'live') {
-      const liveRes = await apiService.getLiveNowcast(currentCity.lat, currentCity.lon, `${currentCity.name}_Site`);
+      const liveRes = await apiService.getLiveNowcast(currentCity.lat, currentCity.lon, currentCity.name);
       setStepData(liveRes);
       if (liveRes.storms && liveRes.storms.length > 0) {
         setSelectedStorm((prev) => (prev ? liveRes.storms.find((s) => s.storm_id === prev.storm_id) || liveRes.storms[0] : null));
@@ -86,7 +86,7 @@ export const App: React.FC = () => {
           target_location: {
             latitude: currentCity.lat,
             longitude: currentCity.lon,
-            label: `${currentCity.name}_Site`
+            label: currentCity.name
           }
         };
       }
@@ -145,7 +145,7 @@ export const App: React.FC = () => {
     apiService.setMode('api');
     setIsPlaying(false);
     try {
-      const liveRes = await apiService.getLiveNowcast(loc.lat, loc.lon, `${loc.name}_Site`);
+      const liveRes = await apiService.getLiveNowcast(loc.lat, loc.lon, loc.name);
       setStepData(liveRes);
       if (liveRes.storms && liveRes.storms.length > 0) {
         setSelectedStorm(liveRes.storms[0]);
@@ -203,7 +203,7 @@ export const App: React.FC = () => {
               lightningFlashes={stepData?.lightningFlashes}
               onMapClickLocation={(lat, lon) => {
                 if (mode === 'live') {
-                  apiService.getLiveNowcast(lat, lon, `${currentCity.name}_Site`).then(setStepData);
+                  apiService.getLiveNowcast(lat, lon, currentCity.name).then(setStepData);
                 }
               }}
             />

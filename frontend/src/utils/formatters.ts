@@ -1,6 +1,6 @@
 /**
  * Utility functions for user-facing meteorological labels and formatting.
- * Eliminates internal technical abbreviations (e.g. STM_*, model codes) in the UI.
+ * Eliminates internal technical abbreviations (e.g. STM_*, underscores, model codes) in the UI.
  */
 
 export function formatStormName(stormId?: string | null, fallbackIndex: number = 0): string {
@@ -36,4 +36,22 @@ export function formatStormType(intensity?: number, stage?: string): string {
   if (intensity && intensity >= 45) return 'Mature Multicell';
   if (stage) return `${stage} Convective Cell`;
   return 'Convective Cell';
+}
+
+/**
+ * Format raw backend location identifiers (e.g. "Mumbai_Site", "Chennai_City")
+ * into clean, natural user-facing city names ("Mumbai", "Chennai", "Delhi NCR").
+ */
+export function formatLocationName(label?: string | null): string {
+  if (!label) return 'Monitoring Site';
+
+  // Replace all underscores with spaces
+  let formatted = label.replace(/_/g, ' ').trim();
+
+  // Strip trailing technical suffixes like " Site", " Live Site", " City" if redundant
+  formatted = formatted.replace(/\s*(Live Site|Site|City)\s*$/i, '').trim();
+
+  if (!formatted) return 'Monitoring Site';
+
+  return formatted;
 }

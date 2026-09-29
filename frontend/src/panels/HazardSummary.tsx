@@ -3,7 +3,7 @@ import { ShieldAlert, Zap, CloudHail, Wind, CloudRain, Clock, AlertTriangle } fr
 import { HazardSummaryData } from '../types/hazard';
 import { SiteEtaSummary } from '../types/forecast';
 
-import { formatStormName } from '../utils/formatters';
+import { formatStormName, formatLocationName } from '../utils/formatters';
 
 interface HazardSummaryProps {
   hazardSummary: HazardSummaryData;
@@ -98,7 +98,7 @@ export const HazardSummary: React.FC<HazardSummaryProps> = ({
       {siteEta && (
         <div className="border-t border-slate-100 pt-3">
           <span className="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2">
-            TARGET SITE STATUS ({siteEta.target_location.label}):
+            TARGET SITE STATUS ({formatLocationName(siteEta.target_location.label)}):
           </span>
 
           <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80 text-[11px] space-y-1.5">
