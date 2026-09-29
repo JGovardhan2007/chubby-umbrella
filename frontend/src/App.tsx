@@ -122,6 +122,21 @@ export const App: React.FC = () => {
     setIsPlaying(true);
   };
 
+  const [currentCityName, setCurrentCityName] = useState<string>('Chennai');
+
+  const handleSelectCity = async (loc: { name: string; lat: number; lon: number }) => {
+    setCurrentCityName(loc.name);
+    try {
+      const liveRes = await apiService.getLiveNowcast(loc.lat, loc.lon, `${loc.name}_Site`);
+      setStepData(liveRes);
+      if (liveRes.storms && liveRes.storms.length > 0) {
+        setSelectedStorm(liveRes.storms[0]);
+      }
+    } catch {
+      // Fallback
+    }
+  };
+
   const timeLabel = stepData?.timestamp
     ? new Date(stepData.timestamp).toLocaleTimeString('en-IN', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit' }) + ' UTC'
     : '14:30 IST';
@@ -137,6 +152,8 @@ export const App: React.FC = () => {
         isBackendConnected={isBackendConnected}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        onSelectCity={handleSelectCity}
+        currentLocationName={currentCityName}
       />
 
       {/* 2. MAIN CONTENT AREA (Left Sidebar + Large Map + Right Info Panel) */}

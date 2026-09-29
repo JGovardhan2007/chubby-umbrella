@@ -76,7 +76,7 @@ export const MapView: React.FC<MapViewProps> = ({
     };
   }, []);
 
-  // Update target site marker on map
+  // Update target site marker on map and pan to location
   useEffect(() => {
     if (!map) return;
 
@@ -103,6 +103,12 @@ export const MapView: React.FC<MapViewProps> = ({
       } else {
         siteMarkerRef.current.setLngLat([longitude, latitude]);
       }
+
+      map.flyTo({
+        center: [longitude, latitude],
+        zoom: 9.0,
+        essential: true
+      });
     }
   }, [map, siteEta]);
 
