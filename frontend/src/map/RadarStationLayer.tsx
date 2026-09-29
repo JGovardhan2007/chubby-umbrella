@@ -110,7 +110,7 @@ export const RadarStationLayer: React.FC<WeatherStationLayerProps> = ({
     };
   }, []);
 
-  // 2. Render Interactive Weather Condition Badges on Map (No black dots)
+  // 2. Render Interactive Weather Condition Badges on Map (Decluttered with Zoom)
   useEffect(() => {
     if (!map) return;
 
@@ -118,17 +118,32 @@ export const RadarStationLayer: React.FC<WeatherStationLayerProps> = ({
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
+    const updateBadgeSize = () => {
+      const zoom = map.getZoom();
+      document.querySelectorAll('.city-weather-badge-marker').forEach((badgeEl) => {
+        const nameSpan = badgeEl.querySelector('.city-badge-name');
+        if (nameSpan) {
+          if (zoom < 5.8) {
+            (nameSpan as HTMLElement).style.display = 'none';
+          } else {
+            (nameSpan as HTMLElement).style.display = 'inline';
+          }
+        }
+      });
+    };
+
     MAJOR_RADAR_CITIES.forEach((city) => {
       const weather = weatherMap[city.name] || { tempC: 28, code: 0, precipMm: 0 };
-      const { icon, bgClass, textClass, borderClass } = getWeatherIconAndLabel(weather.code, weather.precipMm);
+      const { icon, textClass, borderClass } = getWeatherIconAndLabel(weather.code, weather.precipMm);
+      const isZoomedOut = map.getZoom() < 5.8;
 
       const el = document.createElement('div');
       el.className = 'city-weather-badge-marker cursor-pointer select-none transition-transform hover:scale-105 active:scale-95 group';
       el.innerHTML = `
-        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/95 border ${borderClass} shadow-md transition-all hover:shadow-lg">
-          <span class="text-sm leading-none">${icon}</span>
-          <span class="text-[11px] font-bold ${textClass}">${weather.tempC}°</span>
-          <span class="text-[11px] font-semibold text-slate-700 font-sans tracking-tight">${city.name}</span>
+        <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/95 border ${borderClass} shadow-md transition-all hover:shadow-lg backdrop-blur-xs">
+          <span class="text-xs leading-none">${icon}</span>
+          <span class="text-[10.5px] font-bold ${textClass}">${weather.tempC}°</span>
+          <span class="city-badge-name text-[10.5px] font-semibold text-slate-700 font-sans tracking-tight" style="display: ${isZoomedOut ? 'none' : 'inline'}">${city.name}</span>
         </div>
       `;
 
@@ -146,7 +161,10 @@ export const RadarStationLayer: React.FC<WeatherStationLayerProps> = ({
       markersRef.current.push(marker);
     });
 
+    map.on('zoom', updateBadgeSize);
+
     return () => {
+      map.off('zoom', updateBadgeSize);
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
     };
