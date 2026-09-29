@@ -6,7 +6,8 @@ export const MapLegend: React.FC = () => {
     <DraggableWidget
       id="map-legend"
       title="Radar & Intensity Scale"
-      defaultPosition={{ x: 20, y: 310 }}
+      anchor="bottom-right"
+      offset={{ right: 20, bottom: 20 }}
       defaultWidth={250}
       minWidth={220}
       maxWidth={420}

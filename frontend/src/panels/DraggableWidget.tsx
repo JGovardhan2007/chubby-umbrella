@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { GripHorizontal, ChevronDown, ChevronUp, Maximize2, Minimize2 } from 'lucide-react';
+import { GripHorizontal, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface DraggableWidgetProps {
   id: string;
   title: string;
-  defaultPosition: { x: number; y: number };
+  defaultPosition?: { x: number; y: number };
+  anchor?: 'top-left' | 'bottom-right' | 'top-right' | 'bottom-left';
+  offset?: { right?: number; bottom?: number; left?: number; top?: number };
   defaultWidth?: number;
   minWidth?: number;
   maxWidth?: number;
@@ -16,7 +18,9 @@ interface DraggableWidgetProps {
 export const DraggableWidget: React.FC<DraggableWidgetProps> = ({
   id,
   title,
-  defaultPosition,
+  defaultPosition = { x: 20, y: 55 },
+  anchor = 'top-left',
+  offset,
   defaultWidth = 260,
   minWidth = 200,
   maxWidth = 480,
@@ -24,7 +28,10 @@ export const DraggableWidget: React.FC<DraggableWidgetProps> = ({
   collapsible = true,
   isCollapsedDefault = false,
 }) => {
-  const [position, setPosition] = useState(defaultPosition);
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(
+    anchor === 'top-left' ? defaultPosition : null
+  );
+  const [hasBeenDragged, setHasBeenDragged] = useState(false);
   const [width, setWidth] = useState(defaultWidth);
   const [isCollapsed, setIsCollapsed] = useState(isCollapsedDefault);
   const [isDragging, setIsDragging] = useState(false);
@@ -45,17 +52,27 @@ export const DraggableWidget: React.FC<DraggableWidgetProps> = ({
 
   // Handle Drag Start
   const handleMouseDownDrag = (e: React.MouseEvent) => {
-    // Only drag on left click and not on buttons
     if (e.button !== 0) return;
     if ((e.target as HTMLElement).closest('button, input, select')) return;
 
+    if (cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      const parentRect = cardRef.current.parentElement?.getBoundingClientRect() || { left: 0, top: 0 };
+      const currentX = rect.left - parentRect.left;
+      const currentY = rect.top - parentRect.top;
+
+      setPosition({ x: currentX, y: currentY });
+      setHasBeenDragged(true);
+
+      dragStartRef.current = {
+        startX: e.clientX,
+        startY: e.clientY,
+        posX: currentX,
+        posY: currentY,
+      };
+    }
+
     setIsDragging(true);
-    dragStartRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      posX: position.x,
-      posY: position.y,
-    };
     e.preventDefault();
   };
 
@@ -74,7 +91,7 @@ export const DraggableWidget: React.FC<DraggableWidgetProps> = ({
   // Global mousemove and mouseup listeners
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging) {
+      if (isDragging && position) {
         const deltaX = e.clientX - dragStartRef.current.startX;
         const deltaY = e.clientY - dragStartRef.current.startY;
 
@@ -103,23 +120,82 @@ export const DraggableWidget: React.FC<DraggableWidgetProps> = ({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, minWidth, maxWidth]);
+  }, [isDragging, isResizing, minWidth, maxWidth, position]);
+
+  // Toggle Collapse with automatic upward shifting when near the bottom
+  const handleToggleCollapse = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const nextCollapsed = !isCollapsed;
+    setIsCollapsed(nextCollapsed);
+
+    // If expanding and was dragged or near bottom, prevent going off-screen
+    if (!nextCollapsed && cardRef.current && hasBeenDragged && position) {
+      const parentHeight = cardRef.current.parentElement?.clientHeight || window.innerHeight;
+      const estimatedHeight = 180; // approximate expanded card height
+
+      if (position.y + estimatedHeight > parentHeight - 20) {
+        setPosition((prev) => prev ? { ...prev, y: Math.max(20, parentHeight - estimatedHeight - 30) } : null);
+      }
+    }
+  };
+
+  // Style positioning
+  const getStyle = (): React.CSSProperties => {
+    if (hasBeenDragged && position) {
+      return {
+        transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
+        width: `${width}px`,
+        top: 0,
+        left: 0,
+      };
+    }
+
+    if (anchor === 'bottom-right') {
+      return {
+        bottom: `${offset?.bottom ?? 20}px`,
+        right: `${offset?.right ?? 20}px`,
+        width: `${width}px`,
+      };
+    }
+
+    if (anchor === 'top-right') {
+      return {
+        top: `${offset?.top ?? 55}px`,
+        right: `${offset?.right ?? 20}px`,
+        width: `${width}px`,
+      };
+    }
+
+    if (anchor === 'bottom-left') {
+      return {
+        bottom: `${offset?.bottom ?? 20}px`,
+        left: `${offset?.left ?? 20}px`,
+        width: `${width}px`,
+      };
+    }
+
+    // Default top-left
+    const currentPos = position || defaultPosition;
+    return {
+      transform: `translate3d(${currentPos.x}px, ${currentPos.y}px, 0)`,
+      width: `${width}px`,
+      top: 0,
+      left: 0,
+    };
+  };
 
   return (
     <div
       ref={cardRef}
-      style={{
-        transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
-        width: `${width}px`,
-      }}
-      className={`absolute top-0 left-0 z-20 bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl shadow-lg select-none transition-shadow ${
+      style={getStyle()}
+      className={`absolute z-20 bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl shadow-lg select-none transition-shadow ${
         isDragging ? 'shadow-2xl ring-2 ring-amber-500/40 cursor-grabbing' : 'hover:shadow-xl'
       }`}
     >
       {/* Draggable Header */}
       <div
         onMouseDown={handleMouseDownDrag}
-        className="flex items-center justify-between p-3 border-b border-slate-100 cursor-grab active:cursor-grabbing group bg-slate-50/50 rounded-t-xl"
+        className="flex items-center justify-between p-2.5 px-3 border-b border-slate-100 cursor-grab active:cursor-grabbing group bg-slate-50/70 rounded-t-xl"
       >
         <div className="flex items-center gap-2 overflow-hidden">
           <GripHorizontal className="w-4 h-4 text-slate-400 group-hover:text-amber-500 transition-colors shrink-0" />
@@ -130,17 +206,14 @@ export const DraggableWidget: React.FC<DraggableWidgetProps> = ({
 
         {collapsible && (
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsCollapsed(!isCollapsed);
-            }}
+            onClick={handleToggleCollapse}
             className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors shrink-0"
             title={isCollapsed ? "Expand" : "Collapse"}
           >
             {isCollapsed ? (
-              <ChevronDown className="w-4 h-4" />
-            ) : (
               <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
             )}
           </button>
         )}
@@ -148,7 +221,7 @@ export const DraggableWidget: React.FC<DraggableWidgetProps> = ({
 
       {/* Content */}
       {!isCollapsed && (
-        <div className="p-3 text-xs overflow-hidden">
+        <div className="p-3 text-xs overflow-hidden animate-in fade-in duration-150">
           {children}
         </div>
       )}
