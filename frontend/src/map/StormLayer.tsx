@@ -113,6 +113,21 @@ export const StormLayer: React.FC<StormLayerProps> = ({
         data: { type: 'FeatureCollection', features: centroidFeatures }
       });
 
+      // Pulsing outer halo for active convective cores
+      map.addLayer({
+        id: 'storm-cells-halo',
+        type: 'circle',
+        source: centroidSourceId,
+        paint: {
+          'circle-radius': ['case', ['get', 'isSelected'], 16, 12],
+          'circle-color': '#F59E0B',
+          'circle-opacity': 0.25,
+          'circle-stroke-width': 1.5,
+          'circle-stroke-color': '#F59E0B',
+          'circle-stroke-opacity': 0.6
+        }
+      });
+
       // Centroid marker point
       map.addLayer({
         id: centroidLayerId,
@@ -174,7 +189,7 @@ export const StormLayer: React.FC<StormLayerProps> = ({
     }
 
     // Toggle visibility
-    [polyFillLayerId, polyLineLayerId, centroidLayerId, labelLayerId].forEach((layerId) => {
+    [polyFillLayerId, polyLineLayerId, 'storm-cells-halo', centroidLayerId, labelLayerId].forEach((layerId) => {
       if (map.getLayer(layerId)) {
         map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
       }
