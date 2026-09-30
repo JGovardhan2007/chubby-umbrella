@@ -28,7 +28,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToMap }) => {
             </div>
             <div>
               <h2 className="text-sm md:text-base font-bold text-amber-950 font-serif">
-                National Convective Early Warning & Diagnostic System
+                Convective Early Warning & Diagnostic System
               </h2>
               <p className="text-xs text-slate-600">
                 0–6 Hour Probabilistic Nowcasting for Severe Thunderstorms, Hail, Downbursts & Cloudbursts
@@ -109,7 +109,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigateToMap }) => {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
           <div className="flex flex-col">
             <span className="font-bold text-white">
-              National Centre for Medium Range Weather Forecasting (NCMRWF) • India Meteorological Department (IMD)
+              Ministry of Earth Sciences • India Meteorological Department (IMD)
             </span>
             <span className="text-[11px] text-amber-200/70">
               Ministry of Earth Sciences, Government of India

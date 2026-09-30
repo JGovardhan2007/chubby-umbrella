@@ -80,7 +80,7 @@ export const TopBar: React.FC<TopBarProps> = ({
         {onReturnHome && (
           <button
             onClick={onReturnHome}
-            title="Return to NCMRWF & IMD Portal Home"
+            title="Return to Weather Portal Home"
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-bold transition-colors"
           >
             <span>← Portal Home</span>

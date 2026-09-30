@@ -31,7 +31,7 @@ export const GovHeader: React.FC = () => {
         {/* Titles in Pure English */}
         <div className="flex flex-col">
           <h1 className="text-sm md:text-base font-bold text-amber-950 font-serif leading-tight tracking-tight">
-            National Centre for Medium Range Weather Forecasting
+            Convective Weather Early Warning Portal
           </h1>
           <div className="flex items-center gap-1.5 text-xs text-amber-900/80 font-medium">
             <span>Ministry of Earth Sciences</span>
@@ -41,15 +41,15 @@ export const GovHeader: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Right: Official Centre Logo + IMD Badges */}
+      {/* 2. Right: Official Weather Informatics + IMD Badges */}
       <div className="hidden lg:flex items-center gap-4">
-        {/* NCMRWF Logo Emblem */}
+        {/* Weather Informatics Logo Emblem */}
         <div className="flex items-center gap-2 px-3 py-1.5 bg-white/80 rounded-xl border border-amber-900/10 shadow-2xs">
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-600 to-orange-400 flex items-center justify-center text-white font-bold text-xs shadow-inner">
             ⚡
           </div>
           <div className="text-left">
-            <div className="text-[11px] font-bold text-amber-950 tracking-wider">NCMRWF</div>
+            <div className="text-[11px] font-bold text-amber-950 tracking-wider">EARTH SCIENCES</div>
             <div className="text-[9px] text-slate-500 font-medium">Weather Informatics</div>
           </div>
         </div>

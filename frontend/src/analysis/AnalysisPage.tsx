@@ -32,7 +32,7 @@ export const AnalysisPage: React.FC = () => {
           <div>
             <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">
               <BarChart3 className="w-4 h-4" />
-              <span>Numerical Weather Prediction & Convective Analytics • NCMRWF</span>
+              <span>Numerical Weather Prediction & Convective Analytics</span>
             </div>
             <h1 className="text-xl md:text-2xl font-bold tracking-tight">
               Meteorological Diagnostic & Verification Portal

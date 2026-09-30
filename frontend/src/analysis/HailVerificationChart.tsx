@@ -45,7 +45,7 @@ export const HailVerificationChart: React.FC = () => {
               </span>
             </h3>
             <p className="text-xs text-slate-500">
-              Convective Nowcast Pipeline vs. NCMRWF NCUM and IMD WRF numerical guidance
+              Convective Nowcast Pipeline vs. Global NWP and IMD WRF numerical guidance
             </p>
           </div>
         </div>
@@ -80,7 +80,7 @@ export const HailVerificationChart: React.FC = () => {
                 stroke="#2563EB"
                 strokeWidth={2}
                 strokeDasharray="4 4"
-                name="NCMRWF NCUM (CSI)"
+                name="Global NWP Unified (CSI)"
               />
               <Line
                 type="monotone"

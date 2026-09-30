@@ -140,7 +140,7 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
               </span>
             </h3>
             <p className="text-[10px] text-amber-100 font-medium">
-              National Centre for Medium Range Weather Forecasting (NCMRWF)
+              Convective Weather Forecast & Flow Informatics
             </p>
           </div>
         </div>

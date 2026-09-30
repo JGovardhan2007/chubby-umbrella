@@ -11,7 +11,7 @@ export const FORECAST_MODELS_DATA: ForecastModelInfo[] = [
     riskLevel: 'Moderate',
     unit: 'Brightness Temp (K)',
     peakValue: '214 K',
-    sourceModel: 'INSAT-3D / NCMRWF Unified Model (NCUM)',
+    sourceModel: 'INSAT-3D / Unified Global NWP Model',
     forecastRange: 'Day 0 to Day +3 (72 hrs)',
     colorScheme: 'from-blue-600 to-indigo-800',
     affectedRegions: ['Sub-Himalayan Bengal', 'Assam & Meghalaya', 'Odisha Coast']
@@ -24,7 +24,7 @@ export const FORECAST_MODELS_DATA: ForecastModelInfo[] = [
     riskLevel: 'Severe',
     unit: 'Radar Reflectivity (dBZ)',
     peakValue: '54.5 dBZ',
-    sourceModel: 'DWR Radar Network + NCMRWF-IMD Blended',
+    sourceModel: 'DWR Radar Network + IMD Blended NWP',
     forecastRange: 'Day 0 to Day +3 (72 hrs)',
     colorScheme: 'from-amber-500 to-red-700',
     affectedRegions: ['Gangetic West Bengal', 'Jharkhand', 'Coastal Andhra Pradesh']
@@ -118,7 +118,7 @@ export const ForecastCardGrid: React.FC<ForecastCardGridProps> = ({ onSelectMap 
           <div>
             <div className="flex items-center gap-2 text-cyan-400 text-xs font-bold uppercase tracking-wider mb-1">
               <Layers className="w-4 h-4" />
-              <span>Multi-Model Convective Forecast Suite • NCMRWF & IMD</span>
+              <span>Multi-Model Convective Forecast Suite • Earth Sciences & IMD</span>
             </div>
             <h1 className="text-xl md:text-2xl font-bold tracking-tight">
               Meteorological Forecast Maps Gallery
