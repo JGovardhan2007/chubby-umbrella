@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Layers, Wind, Eye, ZoomIn, Navigation, ArrowUpRight, Flame, ShieldAlert, Sparkles } from 'lucide-react';
+import { Layers, Wind, Eye, ZoomIn, Navigation, ArrowUpRight, Flame, ShieldAlert, Sparkles, Maximize2 } from 'lucide-react';
+import { NcmrwfForecastModal } from './NcmrwfForecastModal';
 
 interface CityPoint {
   name: string;
@@ -35,6 +36,7 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [activeLayer, setActiveLayer] = useState<'wind' | 'radar'>('wind');
   const [selectedCity, setSelectedCity] = useState<CityPoint | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   // Animated wind streamlines simulation on canvas
   useEffect(() => {
@@ -301,10 +303,13 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
 
       {/* 3. Bottom Footer Bar: Quick Switch to Map */}
       <div className="bg-[#0A1A27] px-4 py-2.5 border-t border-slate-700/60 flex items-center justify-between text-xs z-20">
-        <div className="flex items-center gap-2 text-[11px] text-slate-300">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-          <span>Live Convective Winds & Radar Reflectivity Stream</span>
-        </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-1.5 px-3 py-1 bg-blue-600/80 hover:bg-blue-600 text-white font-bold rounded-lg transition-all text-xs shadow-xs border border-blue-400/30"
+        >
+          <Maximize2 className="w-3.5 h-3.5" />
+          <span>Launch Synoptic NWP Dashboard</span>
+        </button>
 
         <button
           onClick={() => onNavigateToMap()}
@@ -314,6 +319,15 @@ export const GuidanceMap: React.FC<GuidanceMapProps> = ({ onNavigateToMap }) => 
           <ArrowUpRight className="w-3.5 h-3.5" />
         </button>
       </div>
+
+      {/* 4. Fullscreen Synoptic Weather Forecast Dashboard Modal */}
+      <NcmrwfForecastModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        initialParameter="accumulated_rainfall"
+        onNavigateToNowcast={onNavigateToMap}
+      />
     </div>
   );
 };
+
